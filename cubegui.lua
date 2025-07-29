@@ -216,6 +216,23 @@ createButton("TP to Pos", 240, function()
 	end
 end)
 
+local function fling()
+	local char = game.Players.LocalPlayer.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local bv = Instance.new("BodyAngularVelocity")
+	bv.AngularVelocity = Vector3.new(99999, 99999, 99999)
+	bv.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+	bv.P = 1250
+	bv.Name = "FlingForce"
+	bv.Parent = hrp
+
+	wait(5) -- Fling trong 3 giây
+	bv:Destroy()
+end
+
 -- Toggle Hiện/Ẩn GUI
 toggleButton.MouseButton1Click:Connect(function()
 	if frame.Visible then
