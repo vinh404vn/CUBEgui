@@ -215,7 +215,8 @@ createButton("TP to Pos", 240, function()
 		end
 	end
 end)
-
+-- Fling
+createButton("Fling", 280, fling)
 local function fling()
 	local char = game.Players.LocalPlayer.Character
 	if not char then return end
