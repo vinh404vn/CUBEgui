@@ -244,6 +244,11 @@ toggleButton.MouseButton1Click:Connect(function()
 		toggleButton.Text = "Hide GUI"
 	end
 end)
+--f3x
+createButton("F3X", 320, function()
+	local tool = game:GetObjects("rbxassetid://168410621")[1]
+	tool.Parent = game.Players.LocalPlayer.Backpack
+end)
 
 -- Ghi phiên bản GUI ở góc dưới
 local versionLabel = Instance.new("TextLabel", frame)
