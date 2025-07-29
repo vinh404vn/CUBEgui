@@ -14,8 +14,8 @@ end
 -- Chặn các game không cho execute GUI
 local bannedPlaces = {
     [6516141723] = true, -- Doors
-    [11644044128] = true, -- Untitled Tag Game
-    [15502339080] = true -- Pressure
+    [14044547200] = true, -- Untitled Tag Game
+    [12411473842] = true -- Pressure
 }
 
 if bannedPlaces[game.PlaceId] then
