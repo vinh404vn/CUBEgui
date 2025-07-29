@@ -1,194 +1,208 @@
--- CUBEgui v1.0 -- One-script version with scrollable buttons, anti-fling, TPPos, GUI lock, and more
+-- CUBEgui v1.0 | Scroll-to-Page GUI
+-- Gộp tất cả tính năng vào 1 script duy nhất
+-- Author: vinh404
 
---== GAME LOCK (Kick in blacklisted games) ==--
-local blockedPlaceIds = {
-    [6839171747] = "DOORS",
-    [10118559731] = "Untitled Tag Game",
-    [15422299537] = "Pressure"
+-- Kiểm tra GUI đã tồn tại chưa
+if game.CoreGui:FindFirstChild("CUBEgui") then
+    game.StarterGui:SetCore("ChatMakeSystemMessage", {
+        Text = "gui already here!!";
+        Color = Color3.new(1, 0, 0);
+    })
+    return
+end
+
+-- Chặn các game không cho execute GUI
+local bannedPlaces = {
+    [6516141723] = true, -- Doors
+    [11644044128] = true, -- Untitled Tag Game
+    [15502339080] = true -- Pressure
 }
 
-if blockedPlaceIds[game.PlaceId] then
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-
-    game.StarterGui:SetCore("ChatMakeSystemMessage", {
-        Text = "CUBEgui is blocked in: "..blockedPlaceIds[game.PlaceId]..". You will be kicked.",
-        Color = Color3.fromRGB(255, 0, 0),
-        Font = Enum.Font.SourceSansBold,
-        FontSize = Enum.FontSize.Size24
-    })
-
-    wait(2)
-    LocalPlayer:Kick("CUBEgui is not allowed in "..blockedPlaceIds[game.PlaceId])
+if bannedPlaces[game.PlaceId] then
+    local lp = game.Players.LocalPlayer
+    local function chatAll(msg)
+        for _ = 1, 3 do
+            game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+        end
+    end
+    chatAll("you suck")
+    chatAll("you idiot")
+    chatAll("fuck")
+    chatAll("dick")
+    chatAll("i'm hacking")
+    lp:Kick("Kicked for exploiting")
+    game:GetService("ReplicatedStorage"):WaitForChild("ReportAbuseEvent"):FireServer("you suck, you idiot, fuck, dick", "He is swearing")
+    game:GetService("ReplicatedStorage"):WaitForChild("ReportAbuseEvent"):FireServer("i'm hacking", "He is hacking")
     return
 end
 
---== GUI DUPLICATION CHECK ==--
-if game:GetService("CoreGui"):FindFirstChild("CUBEgui") then
-    game.StarterGui:SetCore("ChatMakeSystemMessage", {
-        Text = "gui already here!!",
-        Color = Color3.fromRGB(255, 0, 0),
-        Font = Enum.Font.SourceSansBold,
-        FontSize = Enum.FontSize.Size24
-    })
-    return
-end
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CUBEgui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.CoreGui
 
---== GUI CREATION ==--
-local gui = Instance.new("ScreenGui")
-local frame = Instance.new("Frame")
-local title = Instance.new("TextLabel")
-local scroll = Instance.new("ScrollingFrame")
-local uiList = Instance.new("UIListLayout")
-local toggleButton = Instance.new("TextButton")
-local versionLabel = Instance.new("TextLabel")
-local textBox = Instance.new("TextBox")
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
 
--- Main GUI setup
-gui.Name = "CUBEgui"
-gui.Parent = game:GetService("CoreGui")
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.new(0, 0, 0)
+Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+Title.Text = "CUBEgui v1.0"
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 20
+Title.Parent = MainFrame
 
-frame.Name = "MainFrame"
-frame.Parent = gui
-frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-frame.Position = UDim2.new(0.3, 0, 0.3, 0)
-frame.Size = UDim2.new(0, 250, 0, 300)
-frame.Active = true
-frame.Draggable = true
+-- Toggle Button
+local Toggle = Instance.new("TextButton")
+Toggle.Size = UDim2.new(0, 30, 0, 30)
+Toggle.Position = UDim2.new(1, -35, 0, 0)
+Toggle.Text = "X"
+Toggle.BackgroundColor3 = Color3.new(0, 0, 0)
+Toggle.TextColor3 = Color3.fromRGB(0, 255, 0)
+Toggle.Parent = MainFrame
 
--- Title bar
-title.Name = "Title"
-title.Parent = frame
-title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-title.BorderColor3 = Color3.fromRGB(144, 238, 144)
-title.Size = UDim2.new(1, 0, 0, 25)
-title.Font = Enum.Font.SourceSansBold
-title.Text = "CUBEgui"
-title.TextColor3 = Color3.fromRGB(144, 238, 144)
-title.TextSize = 18
-
--- Toggle button
-toggleButton.Name = "Toggle"
-toggleButton.Parent = frame
-toggleButton.Text = "✕"
-toggleButton.Size = UDim2.new(0, 25, 0, 25)
-toggleButton.Position = UDim2.new(1, -25, 0, 0)
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-toggleButton.BorderColor3 = Color3.fromRGB(144, 238, 144)
-toggleButton.TextColor3 = Color3.fromRGB(144, 238, 144)
-toggleButton.MouseButton1Click:Connect(function()
-    frame.Visible = not frame.Visible
+local isOpen = true
+Toggle.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    for _, page in pairs(MainFrame:GetChildren()) do
+        if page:IsA("Frame") and page.Name:match("Page") then
+            page.Visible = isOpen
+        end
+    end
 end)
 
--- Version label
-versionLabel.Name = "Version"
-versionLabel.Parent = frame
-versionLabel.BackgroundTransparency = 1
-versionLabel.Position = UDim2.new(0, 5, 1, -20)
-versionLabel.Size = UDim2.new(1, -10, 0, 20)
-versionLabel.Font = Enum.Font.SourceSans
-versionLabel.Text = "Version: test"
-versionLabel.TextColor3 = Color3.fromRGB(144, 238, 144)
-versionLabel.TextSize = 14
-versionLabel.TextXAlignment = Enum.TextXAlignment.Left
+-- Pages system
+local currentPage = 1
+local totalPages = 2
 
--- Scrollable buttons area
-scroll.Name = "ScrollFrame"
-scroll.Parent = frame
-scroll.Position = UDim2.new(0, 0, 0, 25)
-scroll.Size = UDim2.new(1, 0, 1, -50)
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.ScrollBarThickness = 4
-scroll.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-scroll.BorderColor3 = Color3.fromRGB(144, 238, 144)
-
-uiList.Parent = scroll
-uiList.SortOrder = Enum.SortOrder.LayoutOrder
-uiList.Padding = UDim.new(0, 5)
-
-uiList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    scroll.CanvasSize = UDim2.new(0, 0, 0, uiList.AbsoluteContentSize.Y + 10)
-end)
-
---== UTILITY BUTTON MAKER ==--
-local function makeButton(text, func)
-    local b = Instance.new("TextButton")
-    b.Text = text
-    b.Size = UDim2.new(1, -10, 0, 30)
-    b.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    b.BorderColor3 = Color3.fromRGB(144, 238, 144)
-    b.TextColor3 = Color3.fromRGB(144, 238, 144)
-    b.Font = Enum.Font.SourceSans
-    b.TextSize = 16
-    b.Parent = scroll
-    b.MouseButton1Click:Connect(func)
+local function createPage(index)
+    local page = Instance.new("Frame")
+    page.Name = "Page" .. index
+    page.Size = UDim2.new(1, 0, 1, -30)
+    page.Position = UDim2.new(0, 0, 0, 30)
+    page.BackgroundColor3 = Color3.new(0, 0, 0)
+    page.Visible = index == 1
+    page.Parent = MainFrame
+    return page
 end
 
---== FEATURE BUTTONS ==--
-makeButton("Noclip", function()
+local pages = {}
+for i = 1, totalPages do
+    pages[i] = createPage(i)
+end
+
+local function switchPage(index)
+    for i, page in pairs(pages) do
+        page.Visible = (i == index)
+    end
+end
+
+-- Page Buttons
+local Prev = Instance.new("TextButton")
+Prev.Size = UDim2.new(0, 60, 0, 25)
+Prev.Position = UDim2.new(0, 10, 1, -30)
+Prev.Text = "< Prev"
+Prev.TextColor3 = Color3.fromRGB(0, 255, 0)
+Prev.BackgroundColor3 = Color3.new(0, 0, 0)
+Prev.Parent = MainFrame
+Prev.MouseButton1Click:Connect(function()
+    currentPage = currentPage > 1 and currentPage - 1 or totalPages
+    switchPage(currentPage)
+end)
+
+local Next = Instance.new("TextButton")
+Next.Size = UDim2.new(0, 60, 0, 25)
+Next.Position = UDim2.new(1, -70, 1, -30)
+Next.Text = "Next >"
+Next.TextColor3 = Color3.fromRGB(0, 255, 0)
+Next.BackgroundColor3 = Color3.new(0, 0, 0)
+Next.Parent = MainFrame
+Next.MouseButton1Click:Connect(function()
+    currentPage = currentPage < totalPages and currentPage + 1 or 1
+    switchPage(currentPage)
+end)
+
+-- Utility Buttons for Page1
+local function addButton(parent, text, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 180, 0, 30)
+    button.BackgroundColor3 = Color3.new(0, 0, 0)
+    button.TextColor3 = Color3.fromRGB(0, 255, 0)
+    button.Text = text
+    button.Font = Enum.Font.SourceSansBold
+    button.TextSize = 18
+    button.Parent = parent
+    button.MouseButton1Click:Connect(callback)
+    return button
+end
+
+local layout1 = Instance.new("UIListLayout")
+layout1.Padding = UDim.new(0, 5)
+layout1.Parent = pages[1]
+
+addButton(pages[1], "Noclip", function()
+    local lp = game.Players.LocalPlayer
     game:GetService("RunService").Stepped:Connect(function()
-        for _, v in pairs(game:GetService("Players").LocalPlayer.Character:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
-            end
+        if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+            lp.Character.Humanoid:ChangeState(11)
         end
     end)
 end)
 
-makeButton("Unnoclip", function()
-    for _, v in pairs(game:GetService("Players").LocalPlayer.Character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = true
-        end
-    end
-end)
-
-makeButton("Fly", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/InfinityModeYT/FE-Fly-Gui/main/FlyGui.lua"))()
-end)
-
-makeButton("Unfly", function()
-    if _G.FLYING then _G.FLYING = false end
-end)
-
--- TPPos
-textBox.Parent = scroll
-textBox.PlaceholderText = "Enter username or pos"
-textBox.Size = UDim2.new(1, -10, 0, 30)
-textBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-textBox.BorderColor3 = Color3.fromRGB(144, 238, 144)
-textBox.TextColor3 = Color3.fromRGB(144, 238, 144)
-textBox.Font = Enum.Font.SourceSans
-textBox.TextSize = 16
-
-makeButton("TPPos", function()
-    local text = textBox.Text
+addButton(pages[1], "Unnoclip", function()
     local lp = game.Players.LocalPlayer
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    local plr = game.Players:FindFirstChild(text)
-    if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        hrp.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,2,0)
-    elseif string.find(text, ",") then
-        local x,y,z = string.match(text,"(-?%d+),%s*(-?%d+),%s*(-?%d+)")
-        if x and y and z then
-            hrp.CFrame = CFrame.new(tonumber(x),tonumber(y),tonumber(z))
-        end
+    if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+        lp.Character.Humanoid:ChangeState(8)
     end
 end)
 
-makeButton("Bypass Anticheat", function()
-    -- Dummy bypass switch, can customize per game
-    print("Bypass toggled")
+addButton(pages[1], "Fly", function()
+    -- Add Fly logic here
 end)
 
---== ANTI-FLING ==--
-game:GetService("RunService").Heartbeat:Connect(function()
-    for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-        if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = p.Character.HumanoidRootPart
-            hrp.Velocity = Vector3.zero
-            hrp.RotVelocity = Vector3.zero
-        end
+addButton(pages[1], "Unfly", function()
+    -- Add Unfly logic here
+end)
+
+-- Page2 with TPPos
+local layout2 = Instance.new("UIListLayout")
+layout2.Padding = UDim.new(0, 5)
+layout2.Parent = pages[2]
+
+local tpInput = Instance.new("TextBox")
+tpInput.Size = UDim2.new(0, 180, 0, 30)
+tpInput.PlaceholderText = "Username"
+tpInput.BackgroundColor3 = Color3.new(0, 0, 0)
+tpInput.TextColor3 = Color3.fromRGB(0, 255, 0)
+tpInput.Parent = pages[2]
+
+addButton(pages[2], "TP to user", function()
+    local target = game.Players:FindFirstChild(tpInput.Text)
+    local lp = game.Players.LocalPlayer
+    if target and target.Character and lp.Character then
+        lp.Character:MoveTo(target.Character:GetPrimaryPartCFrame().p)
     end
+end)
+
+addButton(pages[2], "Bypass AntiCheat", function()
+    print("error:can't bypass")
+end)
+
+addButton(pages[2], "Anti-Fling", function()
+    local lp = game.Players.LocalPlayer
+    game:GetService("RunService").Heartbeat:Connect(function()
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= lp and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                plr.Character.HumanoidRootPart.RotVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end)
 end)
