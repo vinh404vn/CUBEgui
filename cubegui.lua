@@ -168,7 +168,7 @@ end)
 local posBox = Instance.new("TextBox", frame)
 posBox.Size = UDim2.new(1, -20, 0, 30)
 posBox.Position = UDim2.new(0, 10, 0, 200)
-posBox.PlaceholderText = "Nhập tọa độ X,Y,Z (vd: 0,10,0)"
+posBox.PlaceholderText = "Nhập tọa độ X,Y,Z hoặc ng chơi"
 posBox.Font = Enum.Font.SourceSans
 posBox.TextSize = 16
 posBox.TextColor3 = Color3.new(1, 1, 1)
@@ -179,11 +179,19 @@ posBox.ClearTextOnFocus = false
 -- TPPos
 createButton("TP to Pos", 240, function()
 	local hrp = char:FindFirstChild("HumanoidRootPart")
-	if hrp and posBox.Text then
-		local x, y, z = posBox.Text:match("([^,]+),([^,]+),([^,]+)")
-		if x and y and z then
-			local vec = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
-			hrp.CFrame = CFrame.new(vec)
+	local text = posBox.Text
+	if not hrp or text == "" then return end
+
+	-- Nếu là tọa độ
+	local x, y, z = text:match("([^,]+),([^,]+),([^,]+)")
+	if x and y and z then
+		local vec = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+		hrp.CFrame = CFrame.new(vec)
+	else
+		-- Nếu là tên người chơi
+		local target = game.Players:FindFirstChild(text)
+		if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+			hrp.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
 		end
 	end
 end)
@@ -196,6 +204,39 @@ toggleButton.MouseButton1Click:Connect(function()
 	else
 		frame.Visible = true
 		toggleButton.Text = "Hide GUI"
+	end
+end)
+-- bypass anticheat
+local bypassEnabled = false
+
+createButton("Bypass AntiCheat: OFF", 280, function(btn)
+	bypassEnabled = not bypassEnabled
+
+	if bypassEnabled then
+		btn.Text = "Bypass AntiCheat: ON"
+		-- Các script thường gặp
+		local keywords = {"Anti", "Client", "Exploit", "Protect"}
+		local containers = {
+			player:FindFirstChild("PlayerScripts"),
+			char,
+			game:GetService("Workspace")
+		}
+
+		for _, container in ipairs(containers) do
+			if container then
+				for _, obj in ipairs(container:GetDescendants()) do
+					if obj:IsA("LocalScript") or obj:IsA("Script") then
+						for _, word in ipairs(keywords) do
+							if string.find(obj.Name:lower(), word:lower()) then
+								obj.Disabled = true
+							end
+						end
+					end
+				end
+			end
+		end
+	else
+		btn.Text = "Bypass AntiCheat: OFF"
 	end
 end)
 -- Ghi phiên bản GUI ở góc dưới
