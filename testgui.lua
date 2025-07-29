@@ -84,6 +84,10 @@ local function createButton(name, parent, callback)
 end
 
 -- Các nút bên trái
+local flying = false
+local flyConn = nil
+
+
 createButton("Noclip", leftFrame, function()
 	RunService.Stepped:Connect(function()
 		if char and char:FindFirstChild("Humanoid") then
@@ -98,12 +102,30 @@ createButton("Unnoclip", leftFrame, function()
 	end
 end)
 
-createButton("Fly", leftFrame, function()
-	-- thêm logic bay
+createButton("Fly", 120, function()
+	if flying then return end
+	flying = true
+	local hrp = char:WaitForChild("HumanoidRootPart")
+	local bv = Instance.new("BodyVelocity", hrp)
+	bv.Velocity = Vector3.zero
+	bv.MaxForce = Vector3.new(1, 1, 1) * math.huge
+	bv.Name = "FlyForce"
+
+	flyConn = RunService.RenderStepped:Connect(function()
+		local cam = workspace.CurrentCamera
+		bv.Velocity = cam.CFrame.LookVector * 50
+	end)
 end)
 
-createButton("Unfly", leftFrame, function()
-	-- thêm logic dừng bay
+createButton("UnFly", 160, function()
+	if flying then
+		flying = false
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp and hrp:FindFirstChild("FlyForce") then
+			hrp.FlyForce:Destroy()
+		end
+		if flyConn then flyConn:Disconnect() end
+	end
 end)
 
 local tpBox = Instance.new("TextBox", leftFrame)
