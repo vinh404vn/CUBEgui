@@ -206,45 +206,13 @@ toggleButton.MouseButton1Click:Connect(function()
 		toggleButton.Text = "Hide GUI"
 	end
 end)
--- bypass anticheat
-local bypassEnabled = false
 
-createButton("Bypass AntiCheat: OFF", 280, function(btn)
-	bypassEnabled = not bypassEnabled
-
-	if bypassEnabled then
-		btn.Text = "Bypass AntiCheat: ON"
-		-- Các script thường gặp
-		local keywords = {"Anti", "Client", "Exploit", "Protect"}
-		local containers = {
-			player:FindFirstChild("PlayerScripts"),
-			char,
-			game:GetService("Workspace")
-		}
-
-		for _, container in ipairs(containers) do
-			if container then
-				for _, obj in ipairs(container:GetDescendants()) do
-					if obj:IsA("LocalScript") or obj:IsA("Script") then
-						for _, word in ipairs(keywords) do
-							if string.find(obj.Name:lower(), word:lower()) then
-								obj.Disabled = true
-							end
-						end
-					end
-				end
-			end
-		end
-	else
-		btn.Text = "Bypass AntiCheat: OFF"
-	end
-end)
 -- Ghi phiên bản GUI ở góc dưới
 local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui indev"
+versionLabel.Text = "CUBEgui indev v0.3"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
