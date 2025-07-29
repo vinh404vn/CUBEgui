@@ -4,28 +4,27 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local RunService = game:GetService("RunService")
---blockgame
-local blockedPlaceIds = {
-    [6839171747] = "DOORS",
-    [10118559731] = "Untitled Tag Game",
-    [15422299537] = "Pressure"
-}
+local allowed = true
 
-if blockedPlaceIds[game.PlaceId] then
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
+if game.PlaceId == 126884695634066 then -- Replace với đúng PlaceId của “Grow a Garden”
+	allowed = false
+	local StarterGui = game:GetService("StarterGui")
+	StarterGui:SetCore("ChatMakeSystemMessage", {
+		Text = "❌ GUI không được phép ở đây!";
+		Color = Color3.new(1, 0, 0);
+		Font = Enum.Font.SourceSansBold;
+		TextSize = 20;
+	})
 
-    -- Hiện cảnh báo (trước khi bị kick)
-    game.StarterGui:SetCore("ChatMakeSystemMessage", {
-        Text = "This GUI is blocked in: "..blockedPlaceIds[game.PlaceId]..". You will be kicked.",
-        Color = Color3.fromRGB(255, 0, 0),
-        Font = Enum.Font.SourceSansBold,
-        FontSize = Enum.FontSize.Size24
-    })
-    -- Kick người dùng
-    LocalPlayer:Kick("This GUI is not allowed in "..blockedPlaceIds[game.PlaceId])
-    return
+	-- Ngăn nhân vật di chuyển
+	local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+	local hum = char:WaitForChild("Humanoid")
+	hum.WalkSpeed = 0
+	hum.JumpPower = 0
 end
+
+-- Chặn hiển thị GUI nếu bị khóa
+if not allowed then return end
 -- Kiểm tra nếu GUI đã tồn tại
 if player:WaitForChild("PlayerGui"):FindFirstChild("CUBEgui") then
 	local msg = Instance.new("TextLabel")
