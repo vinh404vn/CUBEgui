@@ -293,7 +293,7 @@ createButton("Print Your Avatar", 250, 120, function()
 																																																																																																																														end)
 
 -- random sfx
-createButton("SFX", rightFrame, function()
+createButton("SFX", 250, 160, function()
 	local sounds = {
 			"rbxassetid://12222005",   -- Quack
 					"rbxassetid://138186576",  -- LOL
