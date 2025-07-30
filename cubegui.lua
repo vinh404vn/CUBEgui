@@ -250,6 +250,48 @@ createButton("F3X", 250, 80, function()
 	tool.Parent = game.Players.LocalPlayer.Backpack
 end)
 
+-- Print avatar
+createButton("Print Your Avatar", 250, 120, function()
+	local userId = Players.LocalPlayer.UserId
+	local avatarURL = ("https://www.roblox.com/headshot-thumbnail/image?userId=%s&width=420&height=420&format=png"):format(userId)
+
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("Part") or obj:IsA("MeshPart") then
+			local hasTexture = false
+
+			--Kiểm tra nếu đã có Decal/Texture/Image rồi
+			for _, child in pairs(obj:GetChildren()) do
+			    if child:IsA("Decal") or child:IsA("Texture") then																			child.Texture = avatarURL
+																												hasTexture = true
+																														end
+																																			end
+
+																																						-- Nếu chưa có, tự tạo decal mới cho mỗi mặt
+																																									if not hasTexture then
+																																													local faces = {
+																																																		Enum.NormalId.Front,
+																																																							Enum.NormalId.Back,
+																																																												Enum.NormalId.Left,
+																																																																	Enum.NormalId.Right,
+																																																																						Enum.NormalId.Top,
+																																																																											Enum.NormalId.Bottom
+																																																																															}
+																																																																																			for _, face in ipairs(faces) do
+																																																																																								local decal = Instance.new("Decal")
+																																																																																													decal.Face = face
+																																																																																																		decal.Texture = avatarURL
+																																																																																																							decal.Parent = obj
+																																																																																																											end
+																																																																																																														end
+
+																																																																																																																	-- Nếu là MeshPart có TextureID → đổi luôn
+																																																																																																																				if obj:IsA("MeshPart") and obj.TextureID ~= "" then
+																																																																																																																								obj.TextureID = avatarURL
+																																																																																																																											end
+																																																																																																																													end
+																																																																																																																														end
+																																																																																																																														end)
+
 -- Ghi phiên bản GUI ở góc dưới
 local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
