@@ -292,6 +292,31 @@ createButton("Print Your Avatar", 250, 120, function()
 																																																																																																																														end
 																																																																																																																														end)
 
+-- random sfx
+createButton("SFX", rightFrame, function()
+	local sounds = {
+			"rbxassetid://12222005",   -- Quack
+					"rbxassetid://138186576",  -- LOL
+							"rbxassetid://911882310",  -- Vine Boom
+									"rbxassetid://6026984224", -- Bruh
+											"rbxassetid://911201999",  -- Bwah sound
+													"rbxassetid://142295308",  -- Scream
+															"rbxassetid://2101148",    -- Glass break
+																}
+																
+																	local soundId = sounds[math.random(1, #sounds)]
+
+																		local sound = Instance.new("Sound", workspace)
+																			sound.SoundId = soundId
+																				sound.Volume = 3
+																					sound:Play()
+
+																						-- Dọn sau khi phát xong
+																							sound.Ended:Connect(function()
+																									sound:Destroy()
+																										end)
+																									end)
+																																																																																																																							
 -- Ghi phiên bản GUI ở góc dưới
 local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
