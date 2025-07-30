@@ -316,13 +316,67 @@ createButton("SFX", 250, 160, function()
 																									sound:Destroy()
 																										end)
 																									end)
+--autowalk
+createButton("AutoWalk", 250, 200, function()
+	local running = true
+		local lp = Players.LocalPlayer
+			local char = lp.Character or lp.CharacterAdded:Wait()
+				local hum = char:WaitForChild("Humanoid")
+					local root = char:WaitForChild("HumanoidRootPart")
+
+						-- Bắt đầu theo dõi liên tục
+							task.spawn(function()
+									while running do
+												-- Tìm người chơi gần nhất
+															local closestPlayer = nil
+																		local shortestDist = math.huge
+																					for _, plr in pairs(Players:GetPlayers()) do
+																									if plr ~= lp and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") then
+																														local theirRoot = plr.Character.HumanoidRootPart
+																																			local dist = (theirRoot.Position - root.Position).Magnitude
+																																								if dist < shortestDist and plr.Character.Humanoid.Health > 0 then
+																																														shortestDist = dist
+																																																				closestPlayer = plr
+																																																									end
+																																																													end
+																																																																end
+
+																																																																			-- Nếu tìm thấy người gần nhất và họ chưa rời hoặc chết
+																																																																						if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart") and closestPlayer.Character:FindFirstChild("Humanoid") then
+																																																																										local targetRoot = closestPlayer.Character.HumanoidRootPart
+																																																																														if closestPlayer.Character.Humanoid.Health > 0 then
+																																																																																			hum:MoveTo(targetRoot.Position)
+																																																																																							end
+																																																																																										end
+
+																																																																																													-- Kiểm tra mỗi 0.5s
+																																																																																																task.wait(0.5)
+																																																																																																		end
+																																																																																																			end)
+
+																																																																																																				-- Nếu bấm lại sẽ tắt
+																																																																																																					local thisBtn = nil
+																																																																																																						for _, b in ipairs(rightFrame:GetChildren()) do
+																																																																																																								if b:IsA("TextButton") and b.Text == "AutoWalk" then
+																																																																																																											thisBtn = b
+																																																																																																														break
+																																																																																																																end
+																																																																																																																	end
+																																																																																																																		if thisBtn then
+																																																																																																																				thisBtn.Text = "Stop AutoWalk"
+																																																																																																																						thisBtn.MouseButton1Click:Connect(function()
+																																																																																																																									running = false
+																																																																																																																												thisBtn.Text = "AutoWalk"
+																																																																																																																														end)
+																																																																																																																															end
+																																																																																																																															end)
 																																																																																																																							
 -- Ghi phiên bản GUI ở góc dưới
 local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui indev v0.6"
+versionLabel.Text = "CUBEgui indev v0.7"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
