@@ -216,7 +216,7 @@ createButton("TP to Pos", 10, 240, function()
 	end
 end)
 -- Fling
-createButton("Fling", 250, 280, fling)
+createButton("Fling", 250, 40, fling)
 local function fling()
 	local char = game.Players.LocalPlayer.Character
 	if not char then return end
@@ -230,7 +230,7 @@ local function fling()
 	bv.Name = "FlingForce"
 	bv.Parent = hrp
 
-	wait(5) -- Fling trong 3 giây
+	wait(5) -- Fling trong 5 giây
 	bv:Destroy()
 end
 
@@ -245,7 +245,7 @@ toggleButton.MouseButton1Click:Connect(function()
 	end
 end)
 --f3x
-createButton("F3X", 250, 320, function()
+createButton("F3X", 250, 80, function()
 	local tool = game:GetObjects("rbxassetid://168410621")[1]
 	tool.Parent = game.Players.LocalPlayer.Backpack
 end)
@@ -255,7 +255,7 @@ local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui indev v0.3"
+versionLabel.Text = "CUBEgui indev v0.4"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
