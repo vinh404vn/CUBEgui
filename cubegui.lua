@@ -64,7 +64,7 @@ toggleButton.BorderSizePixel = 1
 
 -- Frame chính
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 250, 0, 300)
+frame.Size = UDim2.new(0, 500, 0, 300)
 frame.Position = UDim2.new(0.3, 0, 0.3, 0)
 frame.BackgroundColor3 = Color3.new(0, 0, 0)
 frame.BorderColor3 = Color3.fromRGB(100, 255, 100)
@@ -118,10 +118,10 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
 end)
 
 -- Nút chức năng
-local function createButton(name, posY, callback)
+local function createButton(name, posX, posY, callback)
 	local btn = Instance.new("TextButton", frame)
-	btn.Size = UDim2.new(1, -20, 0, 30)
-	btn.Position = UDim2.new(0, 10, 0, posY)
+	btn.Size = UDim2.new(1, -260, 0, 30)
+	btn.Position = UDim2.new(0, posX, 0, posY)
 	btn.Text = name
 	btn.Font = Enum.Font.SourceSans
 	btn.TextColor3 = Color3.new(1, 1, 1)
@@ -137,7 +137,7 @@ local noclipConn = nil
 local flyConn = nil
 
 -- Noclip
-createButton("Noclip", 40, function()
+createButton("Noclip", 10, 40, function()
 	if noclipConn then return end
 	noclipConn = RunService.Stepped:Connect(function()
 		for _, part in pairs(char:GetDescendants()) do
@@ -149,7 +149,7 @@ createButton("Noclip", 40, function()
 end)
 
 -- UnNoclip
-createButton("UnNoclip", 80, function()
+createButton("UnNoclip", 10, 80, function()
 	if noclipConn then
 		noclipConn:Disconnect()
 		noclipConn = nil
@@ -157,7 +157,7 @@ createButton("UnNoclip", 80, function()
 end)
 
 -- Fly
-createButton("Fly", 120, function()
+createButton("Fly", 10, 120, function()
 	if flying then return end
 	flying = true
 	local hrp = char:WaitForChild("HumanoidRootPart")
@@ -173,7 +173,7 @@ createButton("Fly", 120, function()
 end)
 
 -- UnFly
-createButton("UnFly", 160, function()
+createButton("UnFly", 10, 160, function()
 	if flying then
 		flying = false
 		local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -186,7 +186,7 @@ end)
 
 -- Nhập tọa độ
 local posBox = Instance.new("TextBox", frame)
-posBox.Size = UDim2.new(1, -20, 0, 30)
+posBox.Size = UDim2.new(1, -260, 0, 30)
 posBox.Position = UDim2.new(0, 10, 0, 200)
 posBox.PlaceholderText = "Nhập tọa độ X,Y,Z hoặc ng chơi"
 posBox.Font = Enum.Font.SourceSans
@@ -197,7 +197,7 @@ posBox.BorderColor3 = Color3.fromRGB(100, 255, 100)
 posBox.ClearTextOnFocus = false
 
 -- TPPos
-createButton("TP to Pos", 240, function()
+createButton("TP to Pos", 10, 240, function()
 	local hrp = char:FindFirstChild("HumanoidRootPart")
 	local text = posBox.Text
 	if not hrp or text == "" then return end
@@ -216,7 +216,7 @@ createButton("TP to Pos", 240, function()
 	end
 end)
 -- Fling
-createButton("Fling", 280, fling)
+createButton("Fling", 250, 280, fling)
 local function fling()
 	local char = game.Players.LocalPlayer.Character
 	if not char then return end
@@ -245,7 +245,7 @@ toggleButton.MouseButton1Click:Connect(function()
 	end
 end)
 --f3x
-createButton("F3X", 320, function()
+createButton("F3X", 250, 320, function()
 	local tool = game:GetObjects("rbxassetid://168410621")[1]
 	tool.Parent = game.Players.LocalPlayer.Backpack
 end)
