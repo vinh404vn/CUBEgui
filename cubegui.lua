@@ -397,7 +397,7 @@ createButton("AutoWalk", 250, 200, function()
 	end
 end)
 
--- autoaim
+-- ragdoll death
 createButton("Ragdoll Death", 250, 240, function()
 	local char = Players.LocalPlayer.Character
 	if not char then return end
