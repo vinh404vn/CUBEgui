@@ -157,31 +157,47 @@ createButton("UnNoclip", 10, 80, function()
 end)
 
 -- Fly
+local RunService = game:GetService("RunService")
+
+local flying = false
+local flyConn = nil
+
 createButton("Fly", 10, 120, function()
 	if flying then return end
-	flying = true
+	local lp = game.Players.LocalPlayer
+	local char = lp.Character or lp.CharacterAdded:Wait()
 	local hrp = char:WaitForChild("HumanoidRootPart")
-	local bv = Instance.new("BodyVelocity", hrp)
-	bv.Velocity = Vector3.zero
-	bv.MaxForce = Vector3.new(1, 1, 1) * math.huge
-	bv.Name = "FlyForce"
+	local hum = char:WaitForChild("Humanoid")
 
+	flying = true
+	hum.PlatformStand = true
+
+	-- Fly điều hướng bằng MoveDirection (hỗ trợ joystick)
 	flyConn = RunService.RenderStepped:Connect(function()
-		local cam = workspace.CurrentCamera
-		bv.Velocity = cam.CFrame.LookVector * 50
+		if not flying then return end
+		local moveDir = hum.MoveDirection
+		local camDir = workspace.CurrentCamera.CFrame.LookVector
+		local flyVector = Vector3.new(moveDir.X, 0, moveDir.Z).Unit
+		if flyVector.Magnitude > 0 then
+			hrp.Velocity = flyVector * 50 + Vector3.new(0, 5, 0)
+		else
+			hrp.Velocity = Vector3.new(0, 5, 0)
+		end
 	end)
 end)
 
 -- UnFly
-createButton("UnFly", 10, 160, function()
-	if flying then
-		flying = false
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp and hrp:FindFirstChild("FlyForce") then
-			hrp.FlyForce:Destroy()
-		end
-		if flyConn then flyConn:Disconnect() end
-	end
+createButton("Unfly", 10, 160, function()
+	local lp = game.Players.LocalPlayer
+	local char = lp.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local hum = char:FindFirstChild("Humanoid")
+
+	flying = false
+	if flyConn then flyConn:Disconnect() end
+	if hum then hum.PlatformStand = false end
+	if hrp then hrp.Velocity = Vector3.zero end
 end)
 
 -- Nhập tọa độ
