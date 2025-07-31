@@ -317,14 +317,16 @@ createButton("SFX", 250, 160, function()
 																										end)
 																									end)
 --autowalk
-createButton("AutoWalk", 250, 200, function()
+createButton("AutoWalk", 250, 240, function()
 	local lp = Players.LocalPlayer
 	local char = lp.Character or lp.CharacterAdded:Wait()
 	local root = char:WaitForChild("HumanoidRootPart")
 	local hum = char:WaitForChild("Humanoid")
-        local currentTarget = nil
-	-- Tìm người gần nhất ngay lúc này
-	local closestPlayer = nil
+	local PathfindingService = game:GetService("PathfindingService")
+	local target = nil
+	local running = true
+
+	-- Tìm người gần nhất (một lần)
 	local shortestDist = math.huge
 	for _, plr in pairs(Players:GetPlayers()) do
 		if plr ~= lp and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") then
@@ -332,36 +334,19 @@ createButton("AutoWalk", 250, 200, function()
 			local dist = (theirRoot.Position - root.Position).Magnitude
 			if dist < shortestDist and plr.Character.Humanoid.Health > 0 then
 				shortestDist = dist
-				closestPlayer = plr
-		                currentTarget = closestPlayer
+				target = plr
 			end
 		end
 	end
 
-	if not closestPlayer then
+	if not target then
 		warn("Không tìm thấy người chơi gần nhất.")
 		return
 	end
 
-	local targetChar = closestPlayer.Character
-	local targetHumanoid = targetChar:FindFirstChild("Humanoid")
-	local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-
-	local running = true
-
-	task.spawn(function()
-		while running and targetHumanoid and targetHumanoid.Health > 0 and closestPlayer.Parent == Players do
-			if targetRoot then
-				hum:MoveTo(targetRoot.Position)
-			end
-			task.wait(0.5)
-		end
-		warn("AutoWalk stopped: player left or died.")
-	end)
-
 	-- Đổi tên nút thành Stop AutoWalk
-	local thisBtn = nil
-	for _, b in ipairs(rightFrame:GetChildren()) do
+	local thisBtn
+	for _, b in pairs(rightFrame:GetChildren()) do
 		if b:IsA("TextButton") and b.Text == "AutoWalk" then
 			thisBtn = b
 			break
@@ -369,12 +354,49 @@ createButton("AutoWalk", 250, 200, function()
 	end
 	if thisBtn then
 		thisBtn.Text = "Stop AutoWalk"
+	end
+
+	-- Hàm đi theo path
+	task.spawn(function()
+		while running and target and target.Parent == Players and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character:FindFirstChild("HumanoidRootPart") do
+			local targetPos = target.Character.HumanoidRootPart.Position
+			local path = PathfindingService:CreatePath({
+				AgentRadius = 2,
+				AgentHeight = 5,
+				AgentCanJump = true,
+				AgentCanClimb = true
+			})
+			path:ComputeAsync(root.Position, targetPos)
+
+			if path.Status == Enum.PathStatus.Complete then
+				for _, waypoint in ipairs(path:GetWaypoints()) do
+					if not running or not target or target.Parent ~= Players then break end
+					hum:MoveTo(waypoint.Position)
+					hum.MoveToFinished:Wait()
+				end
+			else
+				warn("Không thể tạo đường đi.")
+			end
+
+			task.wait(1)
+		end
+
+		-- Dừng và đặt lại tên nút
+		running = false
+		if thisBtn then thisBtn.Text = "AutoWalk" end
+	end)
+
+	-- Nếu nhấn lại để dừng
+	if thisBtn then
 		thisBtn.MouseButton1Click:Connect(function()
-			running = false
-			thisBtn.Text = "AutoWalk"
+			if running then
+				running = false
+				thisBtn.Text = "AutoWalk"
+			end
 		end)
 	end
 end)
+
 -- autoaim
 createButton("Ragdoll Death", 250, 240, function()
 	local char = Players.LocalPlayer.Character
