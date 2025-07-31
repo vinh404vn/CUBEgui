@@ -376,72 +376,29 @@ createButton("AutoWalk", 250, 200, function()
 	end
 end)
 -- autoaim
-local autoAimRunning = false
-local currentTarget = nil
+createButton("Ragdoll Death", 250, 240, function()
+	local char = Players.LocalPlayer.Character
+	if not char then return end
 
-createButton("AutoAim", 250, 240, function()
-	local camera = workspace.CurrentCamera
-	local lp = Players.LocalPlayer
-
-	-- Nếu đã chọn mục tiêu từ AutoWalk rồi thì dùng lại
-	if not currentTarget or not currentTarget.Parent then
-		-- Tìm người chơi gần nhất (chỉ một lần, giống AutoWalk)
-		local shortestDist = math.huge
-		for _, plr in pairs(Players:GetPlayers()) do
-			if plr ~= lp and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") then
-				local dist = (plr.Character.HumanoidRootPart.Position - lp.Character.HumanoidRootPart.Position).Magnitude
-				if dist < shortestDist and plr.Character.Humanoid.Health > 0 then
-					currentTarget = plr
-					shortestDist = dist
-				end
-			end
+	-- Hủy Motor để thả các phần body ra như ragdoll
+	for _, joint in pairs(char:GetDescendants()) do
+		if joint:IsA("Motor6D") and joint.Name ~= "RootJoint" then
+			local socket = Instance.new("BallSocketConstraint")
+			local a0 = Instance.new("Attachment", joint.Part0)
+			local a1 = Instance.new("Attachment", joint.Part1)
+			socket.Attachment0 = a0
+			socket.Attachment1 = a1
+			socket.Parent = joint.Parent
+			joint:Destroy()
 		end
 	end
 
-	if not currentTarget or not currentTarget.Character then
-		warn("Không tìm thấy mục tiêu để AutoAim.")
-		return
+	-- Cho Humanoid chết giả
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.PlatformStand = true
 	end
-
-	if autoAimRunning then
-		autoAimRunning = false
-		for _, b in pairs(rightFrame:GetChildren()) do
-			if b:IsA("TextButton") and b.Text == "Stop AutoAim" then
-				b.Text = "AutoAim"
-			end
-		end
-		return
-	end
-
-	autoAimRunning = true
-
-	-- Đổi tên nút
-	for _, b in pairs(rightFrame:GetChildren()) do
-		if b:IsA("TextButton") and b.Text == "AutoAim" then
-			b.Text = "Stop AutoAim"
-		end
-	end
-
-	task.spawn(function()
-		while autoAimRunning and currentTarget and currentTarget.Parent == Players do
-			local targetChar = currentTarget.Character
-			if not targetChar or not targetChar:FindFirstChild("Humanoid") then break end
-			if targetChar.Humanoid.Health <= 0 then break end
-			if targetChar:FindFirstChild("HumanoidRootPart") then
-				local targetPos = targetChar.HumanoidRootPart.Position
-				camera.CFrame = CFrame.new(camera.CFrame.Position, targetPos)
-			end
-			task.wait(0.1)
-		end
-		autoAimRunning = false
-		for _, b in pairs(rightFrame:GetChildren()) do
-			if b:IsA("TextButton") and b.Text == "Stop AutoAim" then
-				b.Text = "AutoAim"
-			end
-		end
-	end)
-end)
-																																																																																																																							
+end)																																																																																																																							
 -- Ghi phiên bản GUI ở góc dưới
 local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
