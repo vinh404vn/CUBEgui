@@ -262,9 +262,7 @@ toggleButton.MouseButton1Click:Connect(function()
 end)
 --f3x
 createButton("F3X", 250, 80, function()
-	local tool = game:GetObjects("rbxassetid://168410621")[1]
-	tool.Parent = game.Players.LocalPlayer.Backpack
-end)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/RESCRIPTED/F3X/main/source.lua"))()
 
 -- Print avatar
 createButton("Print Your Avatar", 250, 120, function()
