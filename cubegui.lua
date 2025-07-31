@@ -326,7 +326,7 @@ createButton("AutoWalk", 250, 200, function()
 	local target = nil
 	local running = true
 
-	-- Tìm người gần nhất (một lần)
+	-- Tìm người chơi gần nhất
 	local shortestDist = math.huge
 	for _, plr in pairs(Players:GetPlayers()) do
 		if plr ~= lp and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") then
@@ -344,8 +344,8 @@ createButton("AutoWalk", 250, 200, function()
 		return
 	end
 
-	-- Đổi tên nút thành Stop AutoWalk
-	local thisBtn
+	-- Tìm lại nút để đổi tên
+	local thisBtn = nil
 	for _, b in pairs(rightFrame:GetChildren()) do
 		if b:IsA("TextButton") and b.Text == "AutoWalk" then
 			thisBtn = b
@@ -356,7 +356,7 @@ createButton("AutoWalk", 250, 200, function()
 		thisBtn.Text = "Stop AutoWalk"
 	end
 
-	-- Hàm đi theo path
+	-- Bắt đầu đi theo bằng pathfinding
 	task.spawn(function()
 		while running and target and target.Parent == Players and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character:FindFirstChild("HumanoidRootPart") do
 			local targetPos = target.Character.HumanoidRootPart.Position
@@ -381,12 +381,12 @@ createButton("AutoWalk", 250, 200, function()
 			task.wait(1)
 		end
 
-		-- Dừng và đặt lại tên nút
+		-- Dừng khi không còn hợp lệ
 		running = false
 		if thisBtn then thisBtn.Text = "AutoWalk" end
 	end)
 
-	-- Nếu nhấn lại để dừng
+	-- Gắn sự kiện dừng nếu ấn lại
 	if thisBtn then
 		thisBtn.MouseButton1Click:Connect(function()
 			if running then
