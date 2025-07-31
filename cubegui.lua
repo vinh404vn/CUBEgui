@@ -317,7 +317,7 @@ createButton("SFX", 250, 160, function()
 																										end)
 																									end)
 --autowalk
-createButton("AutoWalk", 250, 240, function()
+createButton("AutoWalk", 250, 200, function()
 	local lp = Players.LocalPlayer
 	local char = lp.Character or lp.CharacterAdded:Wait()
 	local root = char:WaitForChild("HumanoidRootPart")
