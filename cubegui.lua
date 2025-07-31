@@ -317,12 +317,12 @@ createButton("SFX", 250, 160, function()
 																										end)
 																									end)
 --autowalk
-createButton("AutoWalk", 250, 120, function()
+createButton("AutoWalk", 250, 200, function()
 	local lp = Players.LocalPlayer
 	local char = lp.Character or lp.CharacterAdded:Wait()
 	local root = char:WaitForChild("HumanoidRootPart")
 	local hum = char:WaitForChild("Humanoid")
-
+        local currentTarget = nil
 	-- Tìm người gần nhất ngay lúc này
 	local closestPlayer = nil
 	local shortestDist = math.huge
@@ -333,6 +333,7 @@ createButton("AutoWalk", 250, 120, function()
 			if dist < shortestDist and plr.Character.Humanoid.Health > 0 then
 				shortestDist = dist
 				closestPlayer = plr
+		                currentTarget = closestPlayer
 			end
 		end
 	end
@@ -373,6 +374,72 @@ createButton("AutoWalk", 250, 120, function()
 			thisBtn.Text = "AutoWalk"
 		end)
 	end
+end)
+-- autoaim
+local autoAimRunning = false
+local currentTarget = nil
+
+createButton("AutoAim", 250, 240, function()
+	local camera = workspace.CurrentCamera
+	local lp = Players.LocalPlayer
+
+	-- Nếu đã chọn mục tiêu từ AutoWalk rồi thì dùng lại
+	if not currentTarget or not currentTarget.Parent then
+		-- Tìm người chơi gần nhất (chỉ một lần, giống AutoWalk)
+		local shortestDist = math.huge
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr ~= lp and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") then
+				local dist = (plr.Character.HumanoidRootPart.Position - lp.Character.HumanoidRootPart.Position).Magnitude
+				if dist < shortestDist and plr.Character.Humanoid.Health > 0 then
+					currentTarget = plr
+					shortestDist = dist
+				end
+			end
+		end
+	end
+
+	if not currentTarget or not currentTarget.Character then
+		warn("Không tìm thấy mục tiêu để AutoAim.")
+		return
+	end
+
+	if autoAimRunning then
+		autoAimRunning = false
+		for _, b in pairs(rightFrame:GetChildren()) do
+			if b:IsA("TextButton") and b.Text == "Stop AutoAim" then
+				b.Text = "AutoAim"
+			end
+		end
+		return
+	end
+
+	autoAimRunning = true
+
+	-- Đổi tên nút
+	for _, b in pairs(rightFrame:GetChildren()) do
+		if b:IsA("TextButton") and b.Text == "AutoAim" then
+			b.Text = "Stop AutoAim"
+		end
+	end
+
+	task.spawn(function()
+		while autoAimRunning and currentTarget and currentTarget.Parent == Players do
+			local targetChar = currentTarget.Character
+			if not targetChar or not targetChar:FindFirstChild("Humanoid") then break end
+			if targetChar.Humanoid.Health <= 0 then break end
+			if targetChar:FindFirstChild("HumanoidRootPart") then
+				local targetPos = targetChar.HumanoidRootPart.Position
+				camera.CFrame = CFrame.new(camera.CFrame.Position, targetPos)
+			end
+			task.wait(0.1)
+		end
+		autoAimRunning = false
+		for _, b in pairs(rightFrame:GetChildren()) do
+			if b:IsA("TextButton") and b.Text == "Stop AutoAim" then
+				b.Text = "AutoAim"
+			end
+		end
+	end)
 end)
 																																																																																																																							
 -- Ghi phiên bản GUI ở góc dưới
