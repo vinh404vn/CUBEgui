@@ -326,6 +326,9 @@ createButton("AutoWalk", 250, 200, function()
 	local target = nil
 	local running = true
 
+	-- Đảm bảo nhân vật có thể di chuyển
+	hum.PlatformStand = false
+
 	-- Tìm người chơi gần nhất
 	local shortestDist = math.huge
 	for _, plr in pairs(Players:GetPlayers()) do
@@ -356,7 +359,7 @@ createButton("AutoWalk", 250, 200, function()
 		thisBtn.Text = "Stop AutoWalk"
 	end
 
-	-- Bắt đầu đi theo bằng pathfinding
+	-- Vòng lặp theo dõi mục tiêu
 	task.spawn(function()
 		while running and target and target.Parent == Players and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character:FindFirstChild("HumanoidRootPart") do
 			local targetPos = target.Character.HumanoidRootPart.Position
@@ -370,9 +373,10 @@ createButton("AutoWalk", 250, 200, function()
 
 			if path.Status == Enum.PathStatus.Complete then
 				for _, waypoint in ipairs(path:GetWaypoints()) do
-					if not running or not target or target.Parent ~= Players then break end
+					if not running or not target or not target.Character then break end
 					hum:MoveTo(waypoint.Position)
-					hum.MoveToFinished:Wait()
+					local finished = hum.MoveToFinished:Wait()
+					if not finished then break end
 				end
 			else
 				warn("Không thể tạo đường đi.")
@@ -381,7 +385,7 @@ createButton("AutoWalk", 250, 200, function()
 			task.wait(1)
 		end
 
-		-- Dừng khi không còn hợp lệ
+		-- Reset tên nút sau khi xong
 		running = false
 		if thisBtn then thisBtn.Text = "AutoWalk" end
 	end)
