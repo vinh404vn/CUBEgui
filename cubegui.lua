@@ -451,3 +451,77 @@ versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
 versionLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
+local function showMemeOnDeath()
+	local playerId = lp.UserId
+	local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. playerId .. "&width=420&height=420&format=png"
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "DeathMeme"
+	gui.IgnoreGuiInset = true
+	gui.ResetOnSpawn = false
+	gui.Parent = game:GetService("CoreGui")
+
+	-- Meme nền
+	local bg = Instance.new("ImageLabel")
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.Position = UDim2.new(0, 0, 0, 0)
+	bg.BackgroundTransparency = 1
+	bg.Image = "https://tr.rbxcdn.com/f08f94a132e4fda2d9d2025cbfadc8eb/420/420/Image/Png"
+	bg.ScaleType = Enum.ScaleType.Stretch
+	bg.Parent = gui
+
+	-- Avatar fade-in
+	local face = Instance.new("ImageLabel")
+	face.Size = UDim2.new(0.18, 0, 0.32, 0)
+	face.Position = UDim2.new(0.405, 0, 0.33, 0)
+	face.BackgroundTransparency = 1
+	face.Image = avatarUrl
+	face.ImageTransparency = 1 -- Bắt đầu mờ hoàn toàn
+	face.ZIndex = 2
+	face.Parent = gui
+
+	-- Hiệu ứng fade-in
+	task.spawn(function()
+		for i = 1, 25 do
+			if face.Parent then
+				face.ImageTransparency = 1 - (i * 0.03) -- 1 → 0.25
+			end
+			task.wait(0.05)
+		end
+	end)
+
+	-- Nhạc
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://1843521125"
+	sound.Volume = 1
+	sound.Looped = false
+	sound.Parent = workspace
+	sound:Play()
+
+	-- Khi hồi sinh → dọn GUI + dừng nhạc
+	local function cleanup()
+		if gui then gui:Destroy() end
+		if sound then
+			sound:Stop()
+			sound:Destroy()
+		end
+	end
+
+	local charConn
+	charConn = lp.CharacterAdded:Connect(function()
+		cleanup()
+		if charConn then charConn:Disconnect() end
+	end)
+end
+
+-- Theo dõi nhân vật
+lp.CharacterAdded:Connect(function(char)
+	char:WaitForChild("Humanoid").Died:Connect(function()
+		showMemeOnDeath()
+	end)
+end)
