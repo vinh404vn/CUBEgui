@@ -478,7 +478,7 @@ local function showMemeOnDeath()
 	-- Avatar fade-in
 	local face = Instance.new("ImageLabel")
 	face.Size = UDim2.new(0.18, 0, 0.32, 0)
-	face.Position = UDim2.new(0.405, 0, 0.33, 0)
+	face.Position = UDim2.new(0, -10, 0.33, 0)
 	face.BackgroundTransparency = 1
 	face.Image = avatarUrl
 	face.ImageTransparency = 1 -- Bắt đầu mờ hoàn toàn
@@ -497,7 +497,7 @@ local function showMemeOnDeath()
 
 	-- Nhạc
 	local sound = Instance.new("Sound")
-	sound.SoundId = "rbxassetid://1838652895"
+	sound.SoundId = "rbxassetid://1837474332"
 	sound.Volume = 1
 	sound.Looped = false
 	sound.Parent = workspace
