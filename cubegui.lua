@@ -456,62 +456,45 @@ versionLabel.TextXAlignment = Enum.TextXAlignment.Right
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 
--- Lắng nghe khi nhân vật xuất hiện
 lp.CharacterAdded:Connect(function(char)
 	local humanoid = char:WaitForChild("Humanoid")
 
 	humanoid.Died:Connect(function()
 		local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. lp.UserId .. "&width=420&height=420&format=png"
 
+		-- GUI setup
 		local gui = Instance.new("ScreenGui")
-		gui.Name = "MemoriesFrame"
+		gui.Name = "ShedletMemes"
 		gui.IgnoreGuiInset = true
 		gui.ResetOnSpawn = false
 		gui.Parent = game:GetService("CoreGui")
 
-		-- Nền
-		local bgFrame = Instance.new("Frame")
-		bgFrame.Size = UDim2.new(0.4, 0, 0.5, 0)
-		bgFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
-		bgFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Bạn đổi màu ở đây
-		bgFrame.BorderSizePixel = 0
-		bgFrame.Parent = gui
+		-- Nền đen toàn màn
+		local bg = Instance.new("Frame")
+		bg.BackgroundColor3 = Color3.new(0, 0, 0)
+		bg.Size = UDim2.new(1, 0, 1, 0)
+		bg.Position = UDim2.new(0, 0, 0, 0)
+		bg.BorderSizePixel = 0
+		bg.Parent = gui
 
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 16)
-		corner.Parent = bgFrame
-
-		-- Dòng chữ MEMORIES
-		local title = Instance.new("TextLabel")
-		title.Size = UDim2.new(1, 0, 0.2, 0)
-		title.Position = UDim2.new(0, 0, 0, 0)
-		title.BackgroundTransparency = 1
-		title.Text = "MEMORIES"
-		title.TextColor3 = Color3.fromRGB(255, 255, 255)
-		title.TextScaled = true
-		title.Font = Enum.Font.SourceSansBold
-		title.Parent = bgFrame
-
-		-- Avatar fade-in
+		-- Avatar trái màn hình
 		local avatar = Instance.new("ImageLabel")
-		avatar.Size = UDim2.new(0.6, 0, 0.6, 0)
-		avatar.Position = UDim2.new(0.2, 0, 0.3, 0)
-		avatar.BackgroundTransparency = 1
 		avatar.Image = avatarUrl
+		avatar.BackgroundTransparency = 1
 		avatar.ImageTransparency = 1
-		avatar.Parent = bgFrame
+		avatar.Size = UDim2.new(0, 200, 0, 200)
+		avatar.Position = UDim2.new(0, 60, 0.5, -100)
+		avatar.Parent = gui
 
-		-- Fade avatar từ từ
+		-- Hiệu ứng hiện dần avatar
 		task.spawn(function()
 			for i = 1, 25 do
-				if avatar then
-					avatar.ImageTransparency = 1 - (i * 0.03)
-				end
+				avatar.ImageTransparency = 1 - (i * 0.03)
 				task.wait(0.05)
 			end
 		end)
 
-		-- 🎵 Nhạc Memories (ID bạn chọn: 1837474332)
+		-- Phát nhạc bạn chọn
 		local sound = Instance.new("Sound")
 		sound.SoundId = "rbxassetid://1837474332"
 		sound.Volume = 1
@@ -519,13 +502,11 @@ lp.CharacterAdded:Connect(function(char)
 		sound.Parent = workspace
 		sound:Play()
 
-		-- Khi hồi sinh → gỡ GUI + dừng nhạc
+		-- Khi hồi sinh thì xoá GUI và tắt nhạc
 		lp.CharacterAdded:Connect(function()
-			if gui then gui:Destroy() end
-			if sound then
-				sound:Stop()
-				sound:Destroy()
-			end
+			gui:Destroy()
+			sound:Stop()
+			sound:Destroy()
 		end)
 	end)
 end)
