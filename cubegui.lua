@@ -446,7 +446,7 @@ local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui indev v0.9"
+versionLabel.Text = "CUBEgui dev0.1"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
@@ -516,7 +516,7 @@ lp.CharacterAdded:Connect(function(char)
 
 		-- ⏱️ Hồi sinh chậm (nếu hỗ trợ)
 		if lp:FindFirstChild("RespawnTime") then
-			lp.RespawnTime.Value = 5
+			lp.RespawnTime.Value = 8
 		end
 
 		-- ❌ Tự huỷ GUI + dừng nhạc khi hồi sinh
