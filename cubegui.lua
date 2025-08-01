@@ -497,7 +497,7 @@ lp.CharacterAdded:Connect(function(char)
 		-- Phát nhạc bạn chọn
 		local sound = Instance.new("Sound")
 		sound.SoundId = "rbxassetid://1837474332"
-		sound.Volume = 1
+		sound.Volume = 5
 		sound.Looped = false
 		sound.Parent = workspace
 		sound:Play()
