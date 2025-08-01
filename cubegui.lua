@@ -446,7 +446,7 @@ local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui indev v0.7"
+versionLabel.Text = "CUBEgui indev v0.9"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
@@ -463,14 +463,14 @@ lp.CharacterAdded:Connect(function(char)
 	humanoid.Died:Connect(function()
 		local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. lp.UserId .. "&width=420&height=420&format=png"
 
-		-- 🛑 Dừng toàn bộ âm thanh hiện có
+		-- 🛑 Dừng tất cả âm thanh đang chạy
 		for _, s in pairs(SoundService:GetDescendants()) do
 			if s:IsA("Sound") and s.Playing then
 				s:Pause()
 			end
 		end
 
-		-- 🎵 Phát nhạc sau 1s
+		-- 🎵 Phát nhạc sau 1 giây
 		local sound = Instance.new("Sound")
 		sound.SoundId = "rbxassetid://1837474332"
 		sound.Volume = 1
@@ -480,14 +480,14 @@ lp.CharacterAdded:Connect(function(char)
 			sound:Play()
 		end)
 
-		-- 📺 GUI
+		-- 📺 Tạo GUI
 		local gui = Instance.new("ScreenGui")
 		gui.Name = "ShedletMemes"
 		gui.IgnoreGuiInset = true
 		gui.ResetOnSpawn = false
 		gui.Parent = game:GetService("CoreGui")
 
-		-- 🖤 Nền đen toàn màn
+		-- Nền đen full màn
 		local bg = Instance.new("Frame")
 		bg.BackgroundColor3 = Color3.new(0, 0, 0)
 		bg.Size = UDim2.new(1, 0, 1, 0)
@@ -495,7 +495,7 @@ lp.CharacterAdded:Connect(function(char)
 		bg.BorderSizePixel = 0
 		bg.Parent = gui
 
-		-- 🧍 Avatar trái màn, chưa hiện
+		-- Avatar trái màn hình
 		local avatar = Instance.new("ImageLabel")
 		avatar.Image = avatarUrl
 		avatar.BackgroundTransparency = 1
@@ -504,7 +504,7 @@ lp.CharacterAdded:Connect(function(char)
 		avatar.Position = UDim2.new(0, 60, 0.5, -100)
 		avatar.Parent = gui
 
-		-- 💨 Fade in avatar sau 1 giây (sau khi nhạc đã phát)
+		-- Hiện dần avatar sau 1 giây
 		task.delay(1, function()
 			for i = 1, 25 do
 				if avatar then
@@ -514,10 +514,22 @@ lp.CharacterAdded:Connect(function(char)
 			end
 		end)
 
-		-- ⏱️ Delay hồi sinh 5 giây (nếu game hỗ trợ thời gian spawn)
-		local respawnTime = 5
+		-- ⏱️ Hồi sinh chậm (nếu hỗ trợ)
 		if lp:FindFirstChild("RespawnTime") then
-			lp.RespawnTime.Value = respawnTime
+			lp.RespawnTime.Value = 5
 		end
+
+		-- ❌ Tự huỷ GUI + dừng nhạc khi hồi sinh
+		local function cleanup()
+			if gui then gui:Destroy() end
+			if sound then
+				sound:Stop()
+				sound:Destroy()
+			end
+		end
+
+		lp.CharacterAdded:Once(function()
+			cleanup()
+		end)
 	end)
 end)
