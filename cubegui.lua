@@ -497,7 +497,7 @@ local function showMemeOnDeath()
 
 	-- Nhạc
 	local sound = Instance.new("Sound")
-	sound.SoundId = "rbxassetid://1843521125"
+	sound.SoundId = "rbxassetid://1838652895"
 	sound.Volume = 1
 	sound.Looped = false
 	sound.Parent = workspace
