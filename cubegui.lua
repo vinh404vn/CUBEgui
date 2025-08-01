@@ -468,12 +468,14 @@ local function showMemeOnDeath()
 
 	-- Meme nền
 	local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 500000000, 0, 300000000)
-frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+frame.Size = UDim2.new(050000, 500000000, 3000, 300000000)
+frame.Position = UDim2.new(0, 0, 0, 0)
 frame.BackgroundColor3 = Color3.new(0, 0, 0)
 frame.BorderColor3 = Color3.fromRGB(100, 255, 100)
 frame.BorderSizePixel = 0
 frame.Active = true
+	frame.Parent = gui
+	
 
 	-- Avatar fade-in
 	local face = Instance.new("ImageLabel")
