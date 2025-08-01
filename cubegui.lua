@@ -467,18 +467,18 @@ local function showMemeOnDeath()
 	gui.Parent = game:GetService("CoreGui")
 
 	-- Meme nền
-	local bg = Instance.new("ImageLabel")
-	bg.Size = UDim2.new(1, 0, 1, 0)
-	bg.Position = UDim2.new(0, 0, 0, 0)
-	bg.BackgroundTransparency = 1
-	bg.Image = "https://tr.rbxcdn.com/f08f94a132e4fda2d9d2025cbfadc8eb/420/420/Image/Png"
-	bg.ScaleType = Enum.ScaleType.Stretch
-	bg.Parent = gui
+	local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 500000000, 0, 300000000)
+frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+frame.BackgroundColor3 = Color3.new(0, 0, 0)
+frame.BorderColor3 = Color3.fromRGB(100, 255, 100)
+frame.BorderSizePixel = 0
+frame.Active = true
 
 	-- Avatar fade-in
 	local face = Instance.new("ImageLabel")
 	face.Size = UDim2.new(0.18, 0, 0.32, 0)
-	face.Position = UDim2.new(0, -10, 0.33, 0)
+	face.Position = UDim2.new(0, -8, 0.33, 0)
 	face.BackgroundTransparency = 1
 	face.Image = avatarUrl
 	face.ImageTransparency = 1 -- Bắt đầu mờ hoàn toàn
