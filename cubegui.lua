@@ -454,6 +454,7 @@ versionLabel.TextXAlignment = Enum.TextXAlignment.Right
 
 -- memories meme
 local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
 local lp = Players.LocalPlayer
 
 lp.CharacterAdded:Connect(function(char)
@@ -462,14 +463,31 @@ lp.CharacterAdded:Connect(function(char)
 	humanoid.Died:Connect(function()
 		local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. lp.UserId .. "&width=420&height=420&format=png"
 
-		-- GUI setup
+		-- 🛑 Dừng toàn bộ âm thanh hiện có
+		for _, s in pairs(SoundService:GetDescendants()) do
+			if s:IsA("Sound") and s.Playing then
+				s:Pause()
+			end
+		end
+
+		-- 🎵 Phát nhạc sau 1s
+		local sound = Instance.new("Sound")
+		sound.SoundId = "rbxassetid://1837474332"
+		sound.Volume = 1
+		sound.Looped = false
+		sound.Parent = workspace
+		task.delay(1, function()
+			sound:Play()
+		end)
+
+		-- 📺 GUI
 		local gui = Instance.new("ScreenGui")
 		gui.Name = "ShedletMemes"
 		gui.IgnoreGuiInset = true
 		gui.ResetOnSpawn = false
 		gui.Parent = game:GetService("CoreGui")
 
-		-- Nền đen toàn màn
+		-- 🖤 Nền đen toàn màn
 		local bg = Instance.new("Frame")
 		bg.BackgroundColor3 = Color3.new(0, 0, 0)
 		bg.Size = UDim2.new(1, 0, 1, 0)
@@ -477,7 +495,7 @@ lp.CharacterAdded:Connect(function(char)
 		bg.BorderSizePixel = 0
 		bg.Parent = gui
 
-		-- Avatar trái màn hình
+		-- 🧍 Avatar trái màn, chưa hiện
 		local avatar = Instance.new("ImageLabel")
 		avatar.Image = avatarUrl
 		avatar.BackgroundTransparency = 1
@@ -486,27 +504,20 @@ lp.CharacterAdded:Connect(function(char)
 		avatar.Position = UDim2.new(0, 60, 0.5, -100)
 		avatar.Parent = gui
 
-		-- Hiệu ứng hiện dần avatar
-		task.spawn(function()
+		-- 💨 Fade in avatar sau 1 giây (sau khi nhạc đã phát)
+		task.delay(1, function()
 			for i = 1, 25 do
-				avatar.ImageTransparency = 1 - (i * 0.03)
-				task.wait(0.05)
+				if avatar then
+					avatar.ImageTransparency = 1 - (i * 0.03)
+					task.wait(0.05)
+				end
 			end
 		end)
 
-		-- Phát nhạc bạn chọn
-		local sound = Instance.new("Sound")
-		sound.SoundId = "rbxassetid://1837474332"
-		sound.Volume = 5
-		sound.Looped = false
-		sound.Parent = workspace
-		sound:Play()
-
-		-- Khi hồi sinh thì xoá GUI và tắt nhạc
-		lp.CharacterAdded:Connect(function()
-			gui:Destroy()
-			sound:Stop()
-			sound:Destroy()
-		end)
+		-- ⏱️ Delay hồi sinh 5 giây (nếu game hỗ trợ thời gian spawn)
+		local respawnTime = 5
+		if lp:FindFirstChild("RespawnTime") then
+			lp.RespawnTime.Value = respawnTime
+		end
 	end)
 end)
