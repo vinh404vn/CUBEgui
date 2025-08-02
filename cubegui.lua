@@ -332,53 +332,130 @@ createButton("SFX", 250, 160, function()
 																									sound:Destroy()
 																										end)
 																									end)
--- You Are An Idiot
-addButton("YouAreAnIdiot", 250, 200, function()
-    -- Gỡ nếu đã có âm thanh đang chạy
-    local existing = workspace:FindFirstChild("YouAreAnIdiotSound")
-    if existing then
-        existing:Destroy()
+-- AntiLag
+addButton("AntiLag", 250, 200, function()
+    local debris = workspace:GetChildren()
+    for _, obj in ipairs(debris) do
+        if obj:IsA("Part") or obj:IsA("UnionOperation") or obj:IsA("MeshPart") or obj:IsA("Decal") then
+            if not obj:IsDescendantOf(game.Players) then
+                pcall(function()
+                    obj:Destroy()
+                end)
+            end
+        end
+    end
+    print("AntiLag: Cleared unused parts.")
+end)
+
+-- console
+addButton("Console", 250, 240, function()
+    if game.CoreGui:FindFirstChild("CubeConsole") then return end
+
+    local gui = Instance.new("ScreenGui", game.CoreGui)
+    gui.Name = "CubeConsole"
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 200)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+    frame.BackgroundColor3 = Color3.new(0, 0, 0)
+    frame.BorderSizePixel = 0
+    frame.Parent = gui
+    frame.Active = true
+    frame.Draggable = true
+
+    -- Sau khi tạo frame, output và button Run
+local predict = Instance.new("TextButton", frame)
+predict.Size = UDim2.new(0, 140, 0, 30)
+predict.Position = UDim2.new(0, 10, 1, -75)
+predict.Text = "Predict Next Ammo"
+predict.TextColor3 = Color3.fromRGB(0, 255, 0)
+predict.BackgroundColor3 = Color3.new(0.05, 0.05, 0.05)
+predict.Font = Enum.Font.SourceSansBold
+predict.TextSize = 14
+
+predict.MouseButton1Click:Connect(function()
+    -- Chỉ chạy nếu đúng game Buckshot Frenzy
+    if game.PlaceId ~= 16104162437 then
+        output.Text = "Not Buckshot Frenzy"
+        return
     end
 
-    local sound = Instance.new("Sound")
-    sound.Name = "YouAreAnIdiotSound"
-    sound.SoundId = "rbxassetid://130776150" -- Nhạc gốc
-    sound.Volume = 2
-    sound.Looped = false
-    sound.Parent = workspace
-    sound:Play()
-end) -- ✅ Đừng quên cái 'end)' này!
+    -- Tìm GUI hoặc biến hiển thị "round next ammo" nếu game có
+    local foundVal
+    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if obj:IsA("StringValue") and obj.Name:lower():find("next") and obj.Value ~= "" then
+            foundVal = obj.Value
+            break
+        elseif obj:IsA("IntValue") and obj.Name:lower():find("shell") then
+            foundVal = tostring(obj.Value)
+            break
+        end
+    end
 
--- ragdoll death
-createButton("Ragdoll Death", 250, 240, function()
-	local char = Players.LocalPlayer.Character
-	if not char then return end
+    if foundVal then
+        output.Text = "Predicted: " .. foundVal
+    else
+        output.Text = "Cannot detect next ammo type"
+    end
+end)
 
-	-- Hủy Motor để thả các phần body ra như ragdoll
-	for _, joint in pairs(char:GetDescendants()) do
-		if joint:IsA("Motor6D") and joint.Name ~= "RootJoint" then
-			local socket = Instance.new("BallSocketConstraint")
-			local a0 = Instance.new("Attachment", joint.Part0)
-			local a1 = Instance.new("Attachment", joint.Part1)
-			socket.Attachment0 = a0
-			socket.Attachment1 = a1
-			socket.Parent = joint.Parent
-			joint:Destroy()
-		end
-	end
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.Text = "CUBE Console"
+    title.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    title.TextColor3 = Color3.fromRGB(0, 255, 0)
+    title.Font = Enum.Font.SourceSansBold
+    title.TextSize = 20
 
-	-- Cho Humanoid chết giả
-	local hum = char:FindFirstChildOfClass("Humanoid")
-	if hum then
-		hum.PlatformStand = true
-	end
-end)																																																																																																																							
+    local box = Instance.new("TextBox", frame)
+    box.Size = UDim2.new(1, -10, 0, 30)
+    box.Position = UDim2.new(0, 5, 0, 40)
+    box.PlaceholderText = "print('hello') or math.random()"
+    box.TextColor3 = Color3.fromRGB(0, 255, 0)
+    box.BackgroundColor3 = Color3.new(0, 0, 0)
+    box.Text = ""
+    box.Font = Enum.Font.Code
+    box.TextSize = 16
+    box.ClearTextOnFocus = false
+
+    local output = Instance.new("TextLabel", frame)
+    output.Size = UDim2.new(1, -10, 0, 100)
+    output.Position = UDim2.new(0, 5, 0, 80)
+    output.BackgroundColor3 = Color3.new(0, 0, 0)
+    output.TextColor3 = Color3.fromRGB(0, 255, 0)
+    output.Font = Enum.Font.Code
+    output.TextSize = 14
+    output.Text = ""
+    output.TextWrapped = true
+    output.TextXAlignment = Enum.TextXAlignment.Left
+    output.TextYAlignment = Enum.TextYAlignment.Top
+
+    local exec = Instance.new("TextButton", frame)
+    exec.Size = UDim2.new(0, 60, 0, 30)
+    exec.Position = UDim2.new(1, -70, 1, -35)
+    exec.Text = "Run"
+    exec.TextColor3 = Color3.fromRGB(0, 255, 0)
+    exec.BackgroundColor3 = Color3.new(0.05, 0.05, 0.05)
+    exec.Font = Enum.Font.SourceSansBold
+    exec.TextSize = 16
+
+    exec.MouseButton1Click:Connect(function()
+        local success, result = pcall(function()
+            return loadstring(box.Text)()
+        end)
+        if success then
+            output.Text = tostring(result or "Executed.")
+        else
+            output.Text = "Error: " .. result
+        end
+    end)
+end)																																																																																																																				
 -- Ghi phiên bản GUI ở góc dưới
 local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui dev0.21"
+versionLabel.Text = "CUBEgui dev0.23"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
