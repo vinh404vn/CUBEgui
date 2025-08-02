@@ -333,20 +333,22 @@ createButton("SFX", 250, 160, function()
 																										end)
 																									end)
 -- You Are An Idiot
-addButton("You Are An Idiot song", 250, 200, function()
+addButton("YouAreAnIdiot", 250, 200, function()
     -- Gỡ nếu đã có âm thanh đang chạy
-    if workspace:FindFirstChild("YouAreAnIdiotSound") then
-        workspace.YouAreAnIdiotSound:Destroy()
+    local existing = workspace:FindFirstChild("YouAreAnIdiotSound")
+    if existing then
+        existing:Destroy()
     end
 
     local sound = Instance.new("Sound")
     sound.Name = "YouAreAnIdiotSound"
-    sound.SoundId = "rbxassetid://130776150" -- Nhạc gốc youareanidiot
-    sound.Volume = 1
-    sound.Looped = true
+    sound.SoundId = "rbxassetid://130776150" -- Nhạc gốc
+    sound.Volume = 2
+    sound.Looped = false
     sound.Parent = workspace
     sound:Play()
-end)
+end) -- ✅ Đừng quên cái 'end)' này!
+
 -- ragdoll death
 createButton("Ragdoll Death", 250, 240, function()
 	local char = Players.LocalPlayer.Character
@@ -376,7 +378,7 @@ local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui dev0.2"
+versionLabel.Text = "CUBEgui dev0.21"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
@@ -403,7 +405,7 @@ lp.CharacterAdded:Connect(function(char)
 		-- 🎵 Phát nhạc sau 1 giây
 		local sound = Instance.new("Sound")
 		sound.SoundId = "rbxassetid://1837474332"
-		sound.Volume = 1
+		sound.Volume = 2
 		sound.Looped = false
 		sound.Parent = workspace
 		task.delay(1, function()
