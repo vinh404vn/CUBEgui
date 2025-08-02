@@ -333,7 +333,7 @@ createButton("SFX", 250, 160, function()
 																										end)
 																									end)
 -- AntiLag
-addButton("AntiLag", 250, 200, function()
+createButton("AntiLag", 250, 200, function()
     local debris = workspace:GetChildren()
     for _, obj in ipairs(debris) do
         if obj:IsA("Part") or obj:IsA("UnionOperation") or obj:IsA("MeshPart") or obj:IsA("Decal") then
@@ -348,7 +348,7 @@ addButton("AntiLag", 250, 200, function()
 end)
 
 -- console
-addButton("Console", 250, 240, function()
+createButton("Console", 250, 240, function()
     if game.CoreGui:FindFirstChild("CubeConsole") then return end
 
     local gui = Instance.new("ScreenGui", game.CoreGui)
