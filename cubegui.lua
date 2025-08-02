@@ -332,91 +332,21 @@ createButton("SFX", 250, 160, function()
 																									sound:Destroy()
 																										end)
 																									end)
---autowalk
-createButton("❌AutoWalk❌", 250, 200, function()
-	local lp = Players.LocalPlayer
-	local char = lp.Character or lp.CharacterAdded:Wait()
-	local root = char:WaitForChild("HumanoidRootPart")
-	local hum = char:WaitForChild("Humanoid")
-	local PathfindingService = game:GetService("PathfindingService")
-	local target = nil
-	local running = true
+-- You Are An Idiot
+addButton("You Are An Idiot song", 250, 200, function()
+    -- Gỡ nếu đã có âm thanh đang chạy
+    if workspace:FindFirstChild("YouAreAnIdiotSound") then
+        workspace.YouAreAnIdiotSound:Destroy()
+    end
 
-	-- Đảm bảo nhân vật có thể di chuyển
-	hum.PlatformStand = false
-
-	-- Tìm người chơi gần nhất
-	local shortestDist = math.huge
-	for _, plr in pairs(Players:GetPlayers()) do
-		if plr ~= lp and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") then
-			local theirRoot = plr.Character.HumanoidRootPart
-			local dist = (theirRoot.Position - root.Position).Magnitude
-			if dist < shortestDist and plr.Character.Humanoid.Health > 0 then
-				shortestDist = dist
-				target = plr
-			end
-		end
-	end
-
-	if not target then
-		warn("Không tìm thấy người chơi gần nhất.")
-		return
-	end
-
-	-- Tìm lại nút để đổi tên
-	local thisBtn = nil
-	for _, b in pairs(rightFrame:GetChildren()) do
-		if b:IsA("TextButton") and b.Text == "AutoWalk" then
-			thisBtn = b
-			break
-		end
-	end
-	if thisBtn then
-		thisBtn.Text = "Stop AutoWalk"
-	end
-
-	-- Vòng lặp theo dõi mục tiêu
-	task.spawn(function()
-		while running and target and target.Parent == Players and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character:FindFirstChild("HumanoidRootPart") do
-			local targetPos = target.Character.HumanoidRootPart.Position
-			local path = PathfindingService:CreatePath({
-				AgentRadius = 2,
-				AgentHeight = 5,
-				AgentCanJump = true,
-				AgentCanClimb = true
-			})
-			path:ComputeAsync(root.Position, targetPos)
-
-			if path.Status == Enum.PathStatus.Complete then
-				for _, waypoint in ipairs(path:GetWaypoints()) do
-					if not running or not target or not target.Character then break end
-					hum:MoveTo(waypoint.Position)
-					local finished = hum.MoveToFinished:Wait()
-					if not finished then break end
-				end
-			else
-				warn("Không thể tạo đường đi.")
-			end
-
-			task.wait(1)
-		end
-
-		-- Reset tên nút sau khi xong
-		running = false
-		if thisBtn then thisBtn.Text = "AutoWalk" end
-	end)
-
-	-- Gắn sự kiện dừng nếu ấn lại
-	if thisBtn then
-		thisBtn.MouseButton1Click:Connect(function()
-			if running then
-				running = false
-				thisBtn.Text = "AutoWalk"
-			end
-		end)
-	end
+    local sound = Instance.new("Sound")
+    sound.Name = "YouAreAnIdiotSound"
+    sound.SoundId = "rbxassetid://130776150" -- Nhạc gốc youareanidiot
+    sound.Volume = 1
+    sound.Looped = true
+    sound.Parent = workspace
+    sound:Play()
 end)
-
 -- ragdoll death
 createButton("Ragdoll Death", 250, 240, function()
 	local char = Players.LocalPlayer.Character
@@ -446,7 +376,7 @@ local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui dev0.1"
+versionLabel.Text = "CUBEgui dev0.2"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
