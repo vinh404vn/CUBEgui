@@ -1,40 +1,566 @@
 -- LocalScript trong StarterPlayerScripts hoặc StarterGui
+-- Tên: CUBEgui dev0.24
+-- Tác giả: Grok (dựa trên script của bạn, tối ưu hóa và sửa lỗi)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Chặn GUI ở PlaceId cụ thể
 local allowed = true
-
-if game.PlaceId == 126884695634066 then -- Replace với đúng PlaceId của “Grow a Garden”
-	allowed = false
-	local StarterGui = game:GetService("StarterGui")
-	StarterGui:SetCore("ChatMakeSystemMessage", {
-		Text = "❌ GUI không được phép ở đây!";
-		Color = Color3.new(1, 0, 0);
-		Font = Enum.Font.SourceSansBold;
-		TextSize = 20;
-	})
-
-	-- Ngăn nhân vật di chuyển
-	local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-	local hum = char:WaitForChild("Humanoid")
-	hum.WalkSpeed = 0
-	hum.JumpPower = 0
+if game.PlaceId == 126884695634066 then -- Grow a Garden
+    allowed = false
+    StarterGui:SetCore("ChatMakeSystemMessage", {
+        Text = "GUI không được phép ở đây!";
+        Color = Color3.new(1, 0, 0);
+        Font = Enum.Font.SourceSansBold;
+        TextSize = 20;
+    })
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
 end
 
--- Chặn hiển thị GUI nếu bị khóa
+-- Ngăn GUI nếu không được phép
 if not allowed then return end
--- Kiểm tra nếu GUI đã tồn tại
+
+-- Kiểm tra GUI trùng lặp
 if player:WaitForChild("PlayerGui"):FindFirstChild("CUBEgui") then
-	local msg = Instance.new("TextLabel")
-	msg.Text = "gui already here!!"
-	msg.Size = UDim2.new(1, 0, 0, 50)
-	msg.Position = UDim2.new(0, 0, 0.3, 0)
-	msg.BackgroundTransparency = 1
-	msg.TextColor3 = Color3.fromRGB(255, 0, 0)
-	msg.TextStrokeTransparency = 0
+    local msg = Instance.new("TextLabel")
+    msg.Text = "GUI already here!!"
+    msg.Size = UDim2.new(1, 0, 0, 50)
+    msg.Position = UDim2.new(0, 0, 0.3, 0)
+    msg.BackgroundTransparency = 1
+    msg.TextColor3 = Color3.fromRGB(255, 0, 0)
+    msg.TextStrokeTransparency = 0
+    msg.TextStrokeColor3 = Color3.new(0, 0, 0)
+    msg.Font = Enum.Font.SourceSansBold
+    msg.TextScaled = true
+    msg.Parent = player.PlayerGui
+    task.delay(3, function() if msg then msg:Destroy() end end)
+    return
+end
+
+-- Tạo GUI
+local screenGui = Instance.new("ScreenGui", player.PlayerGui)
+screenGui.Name = "CUBEgui"
+screenGui.ResetOnSpawn = false
+
+-- Nút ẩn/hiện GUI
+local toggleButton = Instance.new("TextButton", screenGui)
+toggleButton.Size = UDim2.new(0, 80, 0, 25)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.Text = "Hide GUI"
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 14
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.BackgroundColor3 = Color3.new(0, 0, 0)
+toggleButton.BorderColor3 = Color3.fromRGB(100, 255, 100)
+toggleButton.BorderSizePixel = 1
+
+-- Frame chính (ScrollingFrame)
+local scrollingFrame = Instance.new("ScrollingFrame", screenGui)
+scrollingFrame.Size = UDim2.new(0, 400, 0, 250)
+scrollingFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+scrollingFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+scrollingFrame.BorderColor3 = Color3.fromRGB(100, 255, 100)
+scrollingFrame.BorderSizePixel = 2
+scrollingFrame.Active = true
+scrollingFrame.ScrollBarThickness = 8
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 400)
+
+-- Thanh tiêu đề
+local dragBar = Instance.new("TextLabel", screenGui)
+dragBar.Size = UDim2.new(0, 400, 0, 25)
+dragBar.Position = scrollingFrame.Position + UDim2.new(0, 0, 0, -25)
+dragBar.BackgroundColor3 = Color3.new(0, 0, 0)
+dragBar.Text = "CUBEgui"
+dragBar.TextColor3 = Color3.fromRGB(150, 255, 150)
+dragBar.Font = Enum.Font.SourceSansBold
+dragBar.TextSize = 16
+dragBar.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Kéo GUI
+local dragging, dragInput, dragStart, startPos
+local function updateInput(input)
+    local delta = input.Position - dragStart
+    scrollingFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    dragBar.Position = scrollingFrame.Position + UDim2.new(0, 0, 0, -25)
+end
+
+dragBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = scrollingFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+dragBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateInput(input)
+    end
+end)
+
+-- Hàm tạo nút
+local function createButton(name, posX, posY, callback)
+    local btn = Instance.new("TextButton", scrollingFrame)
+    btn.Size = UDim2.new(1, -210, 0, 25)
+    btn.Position = UDim2.new(0, posX, 0, posY)
+    btn.Text = name
+    btn.Font = Enum.Font.SourceSans
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.TextSize = 14
+    btn.BackgroundColor3 = Color3.new(0, 0, 0)
+    btn.BorderColor3 = Color3.fromRGB(100, 255, 100)
+    btn.BorderSizePixel = 1
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
+
+-- Biến trạng thái
+local flying = false
+local noclipConn = nil
+local flyConn = nil
+local bodyVelocity = nil
+local bodyGyro = nil
+
+-- Fly (Cải tiến với BodyGyro để xoay theo camera)
+createButton("Fly", 10, 10, function()
+    if flying then return end
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if not hrp or not hum then return end
+
+    flying = true
+    hum.PlatformStand = true
+
+    -- Tạo BodyVelocity
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = hrp
+
+    -- Tạo BodyGyro
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bodyGyro.CFrame = hrp.CFrame
+    bodyGyro.Parent = hrp
+
+    -- Điều khiển bay
+    flyConn = RunService.RenderStepped:Connect(function()
+        if not flying or not hrp or not hum or not player.Character then
+            if flyConn then flyConn:Disconnect() end
+            if bodyVelocity then bodyVelocity:Destroy() end
+            if bodyGyro then bodyGyro:Destroy() end
+            flying = false
+            hum.PlatformStand = false
+            return
+        end
+
+        local cam = workspace.CurrentCamera
+        local moveDirection = Vector3.new(0, 0, 0)
+        local speed = hum.WalkSpeed * 1.5 -- Tăng tốc độ bay so với đi bộ
+
+        -- Input bàn phím
+        local forward = UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0
+        local backward = UserInputService:IsKeyDown(Enum.KeyCode.S) and -1 or 0
+        local left = UserInputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0
+        local right = UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0
+        local up = UserInputService:IsKeyDown(Enum.KeyCode.Space) and 1 or 0
+        local down = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) and -1 or 0
+
+        -- Input joystick (di động)
+        local joystickInput = hum.MoveDirection
+
+        -- Kết hợp input
+        local moveDir = Vector3.new(
+            joystickInput.X + left + right,
+            0,
+            joystickInput.Z + forward + backward
+        ).Unit * speed
+
+        -- Tính vector di chuyển theo camera
+        local camLook = cam.CFrame.LookVector
+        local camRight = cam.CFrame.RightVector
+        local finalMove = (camLook * moveDir.Z + camRight * moveDir.X)
+
+        -- Thêm chuyển động dọc
+        if up ~= 0 or down ~= 0 then
+            finalMove = finalMove + Vector3.new(0, (up + down) * speed, 0)
+        end
+
+        -- Xử lý input touch (di động)
+        if UserInputService.TouchEnabled then
+            for _, input in pairs(UserInputService:GetConnectedGamepads()) do
+                if input == Enum.UserInputType.Touch then
+                    local touchPos = UserInputService:GetMouseLocation()
+                    if touchPos.Y < workspace.CurrentCamera.ViewportSize.Y / 2 then
+                        finalMove = finalMove + Vector3.new(0, speed, 0)
+                    else
+                        finalMove = finalMove + Vector3.new(0, -speed, 0)
+                    end
+                end
+            end
+        end
+
+        bodyVelocity.Velocity = finalMove
+        bodyGyro.CFrame = cam.CFrame
+    end)
+end)
+
+-- Unfly
+createButton("Unfly", 10, 40, function()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if not hrp or not hum then return end
+
+    flying = false
+    if flyConn then flyConn:Disconnect(); flyConn = nil end
+    if bodyVelocity then bodyVelocity:Destroy(); bodyVelocity = nil end
+    if bodyGyro then bodyGyro:Destroy(); bodyGyro = nil end
+    hum.PlatformStand = false
+    hrp.Velocity = Vector3.new(0, 0, 0)
+end)
+
+-- Noclip
+createButton("Noclip", 10, 70, function()
+    if noclipConn then return end
+    local char = player.Character
+    if not char then return end
+    noclipConn = RunService.Stepped:Connect(function()
+        if not player.Character then
+            noclipConn:Disconnect()
+            noclipConn = nil
+            return
+        end
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end)
+end)
+
+-- UnNoclip
+createButton("UnNoclip", 10, 100, function()
+    if noclipConn then
+        noclipConn:Disconnect()
+        noclipConn = nil
+    end
+end)
+
+-- TextBox tọa độ
+local posBox = Instance.new("TextBox", scrollingFrame)
+posBox.Size = UDim2.new(1, -210, 0, 25)
+posBox.Position = UDim2.new(0, 10, 0, 130)
+posBox.PlaceholderText = "Nhập tọa độ X,Y,Z hoặc tên người chơi"
+posBox.Font = Enum.Font.SourceSans
+posBox.TextSize = 14
+posBox.TextColor3 = Color3.new(1, 1, 1)
+posBox.BackgroundColor3 = Color3.new(0, 0, 0)
+posBox.BorderColor3 = Color3.fromRGB(100, 255, 100)
+posBox.ClearTextOnFocus = false
+
+-- TP to Pos
+createButton("TP to Pos", 10, 160, function()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local text = posBox.Text
+    if not hrp or text == "" then return end
+
+    -- Nếu là tọa độ
+    local x, y, z = text:match("([^,]+),([^,]+),([^,]+)")
+    if x and y and z then
+        local vec = Vector3.new(tonumber(x) or 0, tonumber(y) or 0, tonumber(z) or 0)
+        hrp.CFrame = CFrame.new(vec)
+    else
+        -- Nếu là tên người chơi
+        local target = game.Players:FindFirstChild(text)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            hrp.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+        end
+    end
+end)
+
+-- TextBox Animation ID
+local animBox = Instance.new("TextBox", scrollingFrame)
+animBox.Size = UDim2.new(1, -210, 0, 25)
+animBox.Position = UDim2.new(0, 10, 0, 190)
+animBox.PlaceholderText = "Nhập Animation ID"
+animBox.Font = Enum.Font.SourceSans
+animBox.TextSize = 14
+animBox.TextColor3 = Color3.new(1, 1, 1)
+animBox.BackgroundColor3 = Color3.new(0, 0, 0)
+animBox.BorderColor3 = Color3.fromRGB(100, 255, 100)
+animBox.ClearTextOnFocus = false
+
+-- Play Animation
+createButton("Play Animation", 10, 220, function()
+    local animId = animBox.Text
+    if animId == "" then return end
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then return end
+
+    local animation = Instance.new("Animation")
+    animation.AnimationId = "rbxassetid://" .. animId
+    local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+    local track = animator:LoadAnimation(animation)
+    track:Play()
+end)
+
+-- Fling
+createButton("Fling", 200, 10, function()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if not hrp or not hum then return end
+
+    local flingVelocity = Instance.new("BodyVelocity")
+    flingVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    flingVelocity.Velocity = Vector3.new(math.random(-1, 1), math.random(0, 1), math.random(-1, 1)).Unit * 200
+    flingVelocity.Name = "FlingForce"
+    flingVelocity.Parent = hrp
+
+    hum.PlatformStand = true
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+    end
+
+    task.spawn(function()
+        task.wait(3)
+        if flingVelocity then flingVelocity:Destroy() end
+        if hum then hum.PlatformStand = false end
+        if hrp then hrp.Velocity = Vector3.new(0, 0, 0) end
+    end)
+end)
+
+-- F3X
+createButton("F3X", 200, 40, function()
+    local tool = game:GetObjects("rbxassetid://168410621")[1]
+    tool.Parent = player.Backpack
+end)
+
+-- Print Your Avatar
+createButton("Print Your Avatar", 200, 70, function()
+    local userId = player.UserId
+    local avatarURL = ("https://www.roblox.com/headshot-thumbnail/image?userId=%s&width=420&height=420&format=png"):format(userId)
+
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Part") or obj:IsA("MeshPart") then
+            local hasTexture = false
+            for _, child in pairs(obj:GetChildren()) do
+                if child:IsA("Decal") or child:IsA("Texture") then
+                    child.Texture = avatarURL
+                    hasTexture = true
+                end
+            end
+            if not hasTexture then
+                local faces = {Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right, Enum.NormalId.Top, Enum.NormalId.Bottom}
+                for _, face in ipairs(faces) do
+                    local decal = Instance.new("Decal")
+                    decal.Face = face
+                    decal.Texture = avatarURL
+                    decal.Parent = obj
+                end
+            end
+            if obj:IsA("MeshPart") and obj.TextureID ~= "" then
+                obj.TextureID = avatarURL
+            end
+        end
+    end
+end)
+
+-- SFX
+createButton("SFX", 200, 100, function()
+    local sounds = {
+        "rbxassetid://12222005", -- Quack
+        "rbxassetid://138186576", -- LOL
+        "rbxassetid://911882310", -- Vine Boom
+        "rbxassetid://6026984224", -- Bruh
+        "rbxassetid://911201999", -- Bwah sound
+        "rbxassetid://142295308", -- Scream
+        "rbxassetid://2101148" -- Glass break
+    }
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = sounds[math.random(1, #sounds)]
+    sound.Volume = 3
+    sound:Play()
+    sound.Ended:Connect(function() sound:Destroy() end)
+end)
+
+-- AntiLag
+createButton("AntiLag", 200, 130, function()
+    for _, obj in pairs(workspace:GetChildren()) do
+        if (obj:IsA("Part") or obj:IsA("UnionOperation") or obj:IsA("MeshPart") or obj:IsA("Decal")) and not obj:IsDescendantOf(game.Players) then
+            pcall(function() obj:Destroy() end)
+        end
+    end
+    print("AntiLag: Cleared unused parts.")
+end)
+
+-- Console
+createButton("Console", 200, 160, function()
+    if game.CoreGui:FindFirstChild("CubeConsole") then return end
+    local gui = Instance.new("ScreenGui", game.CoreGui)
+    gui.Name = "CubeConsole"
+
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 250, 0, 180)
+    frame.Position = UDim2.new(0.5, -125, 0.5, -90)
+    frame.BackgroundColor3 = Color3.new(0, 0, 0)
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 25)
+    title.Text = "CUBE Console"
+    title.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    title.TextColor3 = Color3.fromRGB(0, 255, 0)
+    title.Font = Enum.Font.SourceSansBold
+    title.TextSize = 18
+
+    local box = Instance.new("TextBox", frame)
+    box.Size = UDim2.new(1, -10, 0, 25)
+    box.Position = UDim2.new(0, 5, 0, 35)
+    box.PlaceholderText = "print('hello') or math.random()"
+    box.TextColor3 = Color3.fromRGB(0, 255, 0)
+    box.BackgroundColor3 = Color3.new(0, 0, 0)
+    box.Text = ""
+    box.Font = Enum.Font.Code
+    box.TextSize = 14
+    box.ClearTextOnFocus = false
+
+    local output = Instance.new("TextLabel", frame)
+    output.Size = UDim2.new(1, -10, 0, 80)
+    output.Position = UDim2.new(0, 5, 0, 65)
+    output.BackgroundColor3 = Color3.new(0, 0, 0)
+    output.TextColor3 = Color3.fromRGB(0, 255, 0)
+    output.Font = Enum.Font.Code
+    output.TextSize = 12
+    output.Text = ""
+    output.TextWrapped = true
+    output.TextXAlignment = Enum.TextXAlignment.Left
+    output.TextYAlignment = Enum.TextYAlignment.Top
+
+    local exec = Instance.new("TextButton", frame)
+    exec.Size = UDim2.new(0, 50, 0, 25)
+    exec.Position = UDim2.new(1, -60, 1, -30)
+    exec.Text = "Run"
+    exec.TextColor3 = Color3.fromRGB(0, 255, 0)
+    exec.BackgroundColor3 = Color3.new(0.05, 0.05, 0.05)
+    exec.Font = Enum.Font.SourceSansBold
+    exec.TextSize = 14
+
+    exec.MouseButton1Click:Connect(function()
+        local success, result = pcall(function() return loadstring(box.Text)() end)
+        output.Text = success and tostring(result or "Executed.") or "Error: " .. result
+    end)
+
+    local predict = Instance.new("TextButton", frame)
+    predict.Size = UDim2.new(0, 120, 0, 25)
+    predict.Position = UDim2.new(0, 10, 1, -65)
+    predict.Text = "Predict Next Ammo"
+    predict.TextColor3 = Color3.fromRGB(0, 255, 0)
+    predict.BackgroundColor3 = Color3.new(0.05, 0.05, 0.05)
+    predict.Font = Enum.Font.SourceSansBold
+    predict.TextSize = 12
+
+    predict.MouseButton1Click:Connect(function()
+        if game.PlaceId ~= 16104162437 then
+            output.Text = "Not Buckshot Frenzy"
+            return
+        end
+        local foundVal
+        for _, obj in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if obj:IsA("StringValue") and obj.Name:lower():find("next") and obj.Value ~= "" then
+                foundVal = obj.Value
+                break
+            elseif obj:IsA("IntValue") and obj.Name:lower():find("shell") then
+                foundVal = tostring(obj.Value)
+                break
+            end
+        end
+        output.Text = foundVal and "Predicted: " .. foundVal or "Cannot detect next ammo type"
+    end)
+end)
+
+-- Toggle GUI
+toggleButton.MouseButton1Click:Connect(function()
+    scrollingFrame.Visible = not scrollingFrame.Visible
+    dragBar.Visible = scrollingFrame.Visible
+    toggleButton.Text = scrollingFrame.Visible and "Hide GUI" or "Show GUI"
+end)
+
+-- Version Label
+local versionLabel = Instance.new("TextLabel", scrollingFrame)
+versionLabel.Size = UDim2.new(0, 80, 0, 15)
+versionLabel.Position = UDim2.new(1, -85, 0, 370)
+versionLabel.BackgroundTransparency = 1
+versionLabel.Text = "CUBEgui dev0.24"
+versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
+versionLabel.Font = Enum.Font.SourceSansItalic
+versionLabel.TextSize = 12
+versionLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+-- Meme khi chết
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = char:WaitForChild("Humanoid")
+    rootPart = char:WaitForChild("HumanoidRootPart")
+
+    -- Reset bay khi respawn
+    if flying then
+        flying = false
+        if flyConn then flyConn:Disconnect(); flyConn = nil end
+        if bodyVelocity then bodyVelocity:Destroy(); bodyVelocity = nil end
+        if bodyGyro then bodyGyro:Destroy(); bodyGyro = nil end
+        humanoid.PlatformStand = false
+    end
+
+    humanoid.Died:Connect(function()
+        local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=420&height=420&format=png"
+        for _, s in pairs(SoundService:GetDescendants()) do
+            if s:IsA("Sound") and s.Playing then
+                s:Pause()
+            end
+        end
+
+        local sound = Instance.new("Sound", workspace)
+        sound.SoundId = "rbxassetid://1837474332"
+        sound.Volume = 2
+        sound.Looped = false
+        task.delay(1, function() sound:Play() end)
+
+        local gui = Insta	msg.TextStrokeTransparency = 0
 	msg.TextStrokeColor3 = Color3.new(0, 0, 0)
 	msg.Font = Enum.Font.SourceSansBold
 	msg.TextScaled = true
@@ -1110,7 +1636,7 @@ local versionLabel = Instance.new("TextLabel", frame)
 versionLabel.Size = UDim2.new(0, 100, 0, 20)
 versionLabel.Position = UDim2.new(1, -105, 1, -25)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "CUBEgui dev0.23"
+versionLabel.Text = "CUBEgui version:test"
 versionLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
 versionLabel.Font = Enum.Font.SourceSansItalic
 versionLabel.TextSize = 14
