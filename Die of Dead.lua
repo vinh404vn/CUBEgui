@@ -1,8 +1,9 @@
 --[[
-	CUBE_AbilityGui indev 0.3 (vinh404 - based on GitHub indev 0.2)
-	- Tab 1: 2 Dropdown → FireServer({value1, value2})
-	- Tab 2/3: Run Ability với notification
-	- Thêm: Auto-save state + Success notification (từ Die of Dead.lua)
+	CUBEDoD indev 0.4 (vinh404)
+	- SỬA: Nút Run bị tràn → tăng height + reposition
+	- Tab 1: 2 Dropdown (13px gap, overlay đúng)
+	- Tab 2/3: Run + Killer → nút Run luôn ở dưới
+	- Auto-save + Notification
 --]]
 
 local Players      = game:GetService("Players")
@@ -17,7 +18,7 @@ local old = PlayerGui:FindFirstChild("CUBE_AbilityGui")
 if old then old:Destroy() end
 
 -----------------------------------------------------------------
--- Notification System (từ Die of Dead.lua)
+-- Notification System
 -----------------------------------------------------------------
 local function showNotification(text, color)
 	local notif = Instance.new("ScreenGui", PlayerGui)
@@ -30,7 +31,6 @@ local function showNotification(text, color)
 	frame.BackgroundColor3 = color or Color3.fromRGB(100, 255, 100)
 	frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
 	frame.BorderSizePixel = 2
-	frame.Parent = notif
 	
 	local label = Instance.new("TextLabel", frame)
 	label.Size = UDim2.new(1, 0, 1, 0)
@@ -41,7 +41,6 @@ local function showNotification(text, color)
 	label.TextSize = 16
 	label.TextScaled = true
 	
-	-- Tween animation
 	local tweenIn = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(0.5, -150, 0, 20)})
 	tweenIn:Play()
 	
@@ -53,7 +52,7 @@ local function showNotification(text, color)
 end
 
 -----------------------------------------------------------------
--- GUI chính (tăng height cho dropdown)
+-- GUI chính (TĂNG HEIGHT ĐỂ KHÔNG BỊ TRÀN)
 -----------------------------------------------------------------
 local gui = Instance.new("ScreenGui")
 gui.Name = "CUBE_AbilityGui"
@@ -61,7 +60,7 @@ gui.ResetOnSpawn = false
 gui.Parent = PlayerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 280)  -- Tăng height từ 240 → 280
+mainFrame.Size = UDim2.new(0, 360, 0, 300)  -- Tăng từ 240 → 300
 mainFrame.Position = UDim2.new(0.35, 0, 0.35, 0)
 mainFrame.BackgroundColor3 = Color3.new(0,0,0)
 mainFrame.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -74,7 +73,7 @@ mainFrame.Parent = gui
 local titleBar = Instance.new("TextLabel")
 titleBar.Size = UDim2.new(1,0,0,25)
 titleBar.BackgroundColor3 = Color3.new(0,0,0)
-titleBar.Text = "CUBE_AbilityGui v2.2"
+titleBar.Text = "CUBE_AbilityGui v2.4"
 titleBar.TextColor3 = Color3.fromRGB(150,255,150)
 titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 16
@@ -112,7 +111,7 @@ showBtn.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------------
--- Tab bar (3 tabs)
+-- Tab bar
 -----------------------------------------------------------------
 local tabFrame = Instance.new("Frame")
 tabFrame.Size = UDim2.new(1,0,0,30)
@@ -153,7 +152,7 @@ tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = mainFrame
 
 -----------------------------------------------------------------
--- TAB 1: 2 Dropdown (với auto-save state)
+-- TAB 1: 2 Dropdown (13px gap + overlay)
 -----------------------------------------------------------------
 local chooseFrame = Instance.new("Frame")
 chooseFrame.Size = UDim2.new(1,0,1,0)
@@ -161,11 +160,10 @@ chooseFrame.BackgroundTransparency = 1
 chooseFrame.Visible = true
 chooseFrame.Parent = tabContainer
 
--- Load saved state
 local savedValue1 = PlayerGui:FindFirstChild("SavedValue1") and PlayerGui.SavedValue1.Value or nil
 local savedValue2 = PlayerGui:FindFirstChild("SavedValue2") and PlayerGui.SavedValue2.Value or nil
 
--- Dropdown 1
+-- Dropdown 1 (trên)
 local dropdown1 = Instance.new("TextButton")
 dropdown1.Size = UDim2.new(1,-20,0,30)
 dropdown1.Position = UDim2.new(0,10,0,10)
@@ -173,6 +171,7 @@ dropdown1.Text = savedValue1 and ("Value1: " .. savedValue1) or "Select Value1"
 dropdown1.TextColor3 = Color3.new(1,1,1)
 dropdown1.BackgroundColor3 = Color3.new(0,0,0)
 dropdown1.BorderColor3 = Color3.fromRGB(100,255,100)
+dropdown1.ZIndex = 10
 dropdown1.Parent = chooseFrame
 
 local list1 = Instance.new("ScrollingFrame")
@@ -182,91 +181,80 @@ list1.BackgroundColor3 = Color3.fromRGB(10,10,10)
 list1.BorderColor3 = Color3.fromRGB(100,255,100)
 list1.ScrollBarThickness = 6
 list1.Visible = false
+list1.ZIndex = 10
 list1.Parent = chooseFrame
 
 local layout1 = Instance.new("UIListLayout")
 layout1.SortOrder = Enum.SortOrder.LayoutOrder
 layout1.Parent = list1
 
--- Dropdown 2
+-- Dropdown 2 (dưới, cách 13px)
 local dropdown2 = Instance.new("TextButton")
 dropdown2.Size = UDim2.new(1,-20,0,30)
-dropdown2.Position = UDim2.new(0,10,0,170)
+dropdown2.Position = UDim2.new(0,10,0,53)  -- 10 + 30 + 13
 dropdown2.Text = savedValue2 and ("Value2: " .. savedValue2) or "Select Value2"
 dropdown2.TextColor3 = Color3.new(1,1,1)
 dropdown2.BackgroundColor3 = Color3.new(0,0,0)
 dropdown2.BorderColor3 = Color3.fromRGB(100,255,100)
+dropdown2.ZIndex = 9
 dropdown2.Parent = chooseFrame
 
 local list2 = Instance.new("ScrollingFrame")
 list2.Size = UDim2.new(1,-20,0,120)
-list2.Position = UDim2.new(0,10,0,205)
+list2.Position = UDim2.new(0,10,0,88)
 list2.BackgroundColor3 = Color3.fromRGB(10,10,10)
 list2.BorderColor3 = Color3.fromRGB(100,255,100)
 list2.ScrollBarThickness = 6
 list2.Visible = false
+list2.ZIndex = 5
 list2.Parent = chooseFrame
 
 local layout2 = Instance.new("UIListLayout")
 layout2.SortOrder = Enum.SortOrder.LayoutOrder
 layout2.Parent = list2
 
--- Danh sách khả dụng (có thể chỉnh tùy game)
-local options = {
-	"Banana","Revolver","Caretaker","BonusPad","Punch","Block",
-	"Hotdog","Dash","Cloak","Adrenaline","Taunt"
-}
-
+local options = {"Banana","Revolver","Caretaker","BonusPad","Punch","Block","Hotdog","Dash","Cloak","Adrenaline","Taunt"}
 local value1 = savedValue1
 local value2 = savedValue2
 
--- Tạo option cho dropdown 1
 for i, name in ipairs(options) do
-	local opt = Instance.new("TextButton")
-	opt.Size = UDim2.new(1,-10,0,22)
-	opt.BackgroundColor3 = Color3.new(0,0,0)
-	opt.BorderColor3 = Color3.fromRGB(100,255,100)
-	opt.Text = name
-	opt.TextColor3 = Color3.new(1,1,1)
-	opt.Font = Enum.Font.SourceSans
-	opt.LayoutOrder = i
-	opt.Parent = list1
-	opt.MouseButton1Click:Connect(function()
+	local opt1 = Instance.new("TextButton")
+	opt1.Size = UDim2.new(1,-10,0,22)
+	opt1.BackgroundColor3 = Color3.new(0,0,0)
+	opt1.BorderColor3 = Color3.fromRGB(100,255,100)
+	opt1.Text = name
+	opt1.TextColor3 = Color3.new(1,1,1)
+	opt1.Font = Enum.Font.SourceSans
+	opt1.LayoutOrder = i
+	opt1.ZIndex = 10
+	opt1.Parent = list1
+	opt1.MouseButton1Click:Connect(function()
 		value1 = name
 		dropdown1.Text = "Value1: " .. name
 		list1.Visible = false
-		-- Auto-save
-		local save1 = Instance.new("StringValue", PlayerGui)
-		save1.Name = "SavedValue1"
-		save1.Value = name
+		list2.Visible = false
+		local save = PlayerGui:FindFirstChild("SavedValue1") or Instance.new("StringValue", PlayerGui)
+		save.Name = "SavedValue1"
+		save.Value = name
 	end)
-end
-list1.CanvasSize = UDim2.new(0,0,0, #options * 24)
 
--- Tạo option cho dropdown 2
-for i, name in ipairs(options) do
-	local opt = Instance.new("TextButton")
-	opt.Size = UDim2.new(1,-10,0,22)
-	opt.BackgroundColor3 = Color3.new(0,0,0)
-	opt.BorderColor3 = Color3.fromRGB(100,255,100)
-	opt.Text = name
-	opt.TextColor3 = Color3.new(1,1,1)
-	opt.Font = Enum.Font.SourceSans
-	opt.LayoutOrder = i
-	opt.Parent = list2
-	opt.MouseButton1Click:Connect(function()
+	local opt2 = opt1:Clone()
+	opt2.ZIndex = 5
+	opt2.Parent = list2
+	opt2.MouseButton1Click:Connect(function()
 		value2 = name
 		dropdown2.Text = "Value2: " .. name
 		list2.Visible = false
-		-- Auto-save
-		local save2 = Instance.new("StringValue", PlayerGui)
-		save2.Name = "SavedValue2"
-		save2.Value = name
+		list1.Visible = false
+		local save = PlayerGui:FindFirstChild("SavedValue2") or Instance.new("StringValue", PlayerGui)
+		save.Name = "SavedValue2"
+		save.Value = name
 	end)
 end
+
+list1.CanvasSize = UDim2.new(0,0,0, #options * 24)
 list2.CanvasSize = UDim2.new(0,0,0, #options * 24)
 
--- Mở/đóng dropdown
 dropdown1.MouseButton1Click:Connect(function()
 	list1.Visible = not list1.Visible
 	list2.Visible = false
@@ -277,172 +265,105 @@ dropdown2.MouseButton1Click:Connect(function()
 	list1.Visible = false
 end)
 
--- Nút Execute (với notification)
 local executeBtn = Instance.new("TextButton")
 executeBtn.Size = UDim2.new(0,100,0,30)
-executeBtn.Position = UDim2.new(0.5,-50,0,335)
+executeBtn.Position = UDim2.new(0.5,-50,0,255)  -- Dưới dropdown 2
 executeBtn.Text = "Execute"
 executeBtn.TextColor3 = Color3.new(1,1,1)
 executeBtn.BackgroundColor3 = Color3.new(0,0,0)
 executeBtn.BorderColor3 = Color3.fromRGB(100,255,100)
+executeBtn.ZIndex = 10
 executeBtn.Parent = chooseFrame
 
 executeBtn.MouseButton1Click:Connect(function()
 	if value1 and value2 then
 		pcall(function()
 			Events:WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer({value1, value2})
-			showNotification("Executed: " .. value1 .. " + " .. value2, Color3.fromRGB(100, 255, 100))
+			showNotification("Sent: " .. value1 .. " + " .. value2, Color3.fromRGB(100, 255, 100))
 		end)
 	else
-		showNotification("Chọn cả 2 value!", Color3.fromRGB(255, 100, 100))
+		showNotification("Chọn cả 2!", Color3.fromRGB(255, 100, 100))
 	end
 end)
 
 -----------------------------------------------------------------
--- TAB 2: Run Ability (giữ nguyên, thêm notif)
+-- TAB 2 & 3: Run + Killer (nút Run ở y=255)
 -----------------------------------------------------------------
-local runFrame = Instance.new("Frame")
-runFrame.Size = UDim2.new(1,0,1,0)
-runFrame.BackgroundTransparency = 1
-runFrame.Visible = false
-runFrame.Parent = tabContainer
+local function createRunTab(name, abilities, parentFrame)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1,0,1,0)
+	frame.BackgroundTransparency = 1
+	frame.Visible = false
+	frame.Parent = parentFrame
 
-local runDropdown = Instance.new("TextButton")
-runDropdown.Size = UDim2.new(1,-20,0,30)
-runDropdown.Position = UDim2.new(0,10,0,10)
-runDropdown.Text = "Select Ability"
-runDropdown.TextColor3 = Color3.new(1,1,1)
-runDropdown.BackgroundColor3 = Color3.new(0,0,0)
-runDropdown.BorderColor3 = Color3.fromRGB(100,255,100)
-runDropdown.Parent = runFrame
+	local dropdown = Instance.new("TextButton")
+	dropdown.Size = UDim2.new(1,-20,0,30)
+	dropdown.Position = UDim2.new(0,10,0,10)
+	dropdown.Text = "Select " .. name
+	dropdown.TextColor3 = Color3.new(1,1,1)
+	dropdown.BackgroundColor3 = Color3.new(0,0,0)
+	dropdown.BorderColor3 = Color3.fromRGB(100,255,100)
+	dropdown.Parent = frame
 
-local runList = Instance.new("ScrollingFrame")
-runList.Size = UDim2.new(1,-20,0,140)
-runList.Position = UDim2.new(0,10,0,45)
-runList.BackgroundColor3 = Color3.fromRGB(10,10,10)
-runList.BorderColor3 = Color3.fromRGB(100,255,100)
-runList.ScrollBarThickness = 6
-runList.Visible = false
-runList.Parent = runFrame
+	local list = Instance.new("ScrollingFrame")
+	list.Size = UDim2.new(1,-20,0,140)
+	list.Position = UDim2.new(0,10,0,45)
+	list.BackgroundColor3 = Color3.fromRGB(10,10,10)
+	list.BorderColor3 = Color3.fromRGB(100,255,100)
+	list.ScrollBarThickness = 6
+	list.Visible = false
+	list.Parent = frame
 
-local runLayout = Instance.new("UIListLayout")
-runLayout.SortOrder = Enum.SortOrder.LayoutOrder
-runLayout.Parent = runList
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = list
 
-local runValue = nil
-for i, name in ipairs(options) do
-	local opt = Instance.new("TextButton")
-	opt.Size = UDim2.new(1,-10,0,22)
-	opt.BackgroundColor3 = Color3.new(0,0,0)
-	opt.BorderColor3 = Color3.fromRGB(100,255,100)
-	opt.Text = name
-	opt.TextColor3 = Color3.new(1,1,1)
-	opt.Font = Enum.Font.SourceSans
-	opt.LayoutOrder = i
-	opt.Parent = runList
-	opt.MouseButton1Click:Connect(function()
-		runValue = name
-		runDropdown.Text = "Selected: " .. name
-		runList.Visible = false
-	end)
-end
-runList.CanvasSize = UDim2.new(0,0,0, #options * 24)
-
-runDropdown.MouseButton1Click:Connect(function()
-	runList.Visible = not runList.Visible
-end)
-
-local runBtn = Instance.new("TextButton")
-runBtn.Size = UDim2.new(0,100,0,30)
-runBtn.Position = UDim2.new(0.5,-50,0,195)
-runBtn.Text = "Run"
-runBtn.TextColor3 = Color3.new(1,1,1)
-runBtn.BackgroundColor3 = Color3.new(0,0,0)
-runBtn.BorderColor3 = Color3.fromRGB(100,255,100)
-runBtn.Parent = runFrame
-
-runBtn.MouseButton1Click:Connect(function()
-	if runValue then
-		pcall(function()
-			Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(runValue)
-			showNotification("Ran: " .. runValue, Color3.fromRGB(100, 255, 100))
+	local value = nil
+	for i, ab in ipairs(abilities) do
+		local opt = Instance.new("TextButton")
+		opt.Size = UDim2.new(1,-10,0,22)
+		opt.BackgroundColor3 = Color3.new(0,0,0)
+		opt.BorderColor3 = Color3.fromRGB(100,255,100)
+		opt.Text = ab
+		opt.TextColor3 = Color3.new(1,1,1)
+		opt.Font = Enum.Font.SourceSans
+		opt.LayoutOrder = i
+		opt.Parent = list
+		opt.MouseButton1Click:Connect(function()
+			value = ab
+			dropdown.Text = "Selected: " .. ab
+			list.Visible = false
 		end)
 	end
-end)
+	list.CanvasSize = UDim2.new(0,0,0, #abilities * 24)
 
------------------------------------------------------------------
--- TAB 3: Killer Ability (giữ nguyên, thêm notif)
------------------------------------------------------------------
-local killerFrame = Instance.new("Frame")
-killerFrame.Size = UDim2.new(1,0,1,0)
-killerFrame.BackgroundTransparency = 1
-killerFrame.Visible = false
-killerFrame.Parent = tabContainer
-
-local killerDropdown = Instance.new("TextButton")
-killerDropdown.Size = UDim2.new(1,-20,0,30)
-killerDropdown.Position = UDim2.new(0,10,0,10)
-killerDropdown.Text = "Select Killer Ability"
-killerDropdown.TextColor3 = Color3.new(1,1,1)
-killerDropdown.BackgroundColor3 = Color3.new(0,0,0)
-killerDropdown.BorderColor3 = Color3.fromRGB(100,255,100)
-killerDropdown.Parent = killerFrame
-
-local killerList = Instance.new("ScrollingFrame")
-killerList.Size = UDim2.new(1,-20,0,140)
-killerList.Position = UDim2.new(0,10,0,45)
-killerList.BackgroundColor3 = Color3.fromRGB(10,10,10)
-killerList.BorderColor3 = Color3.fromRGB(100,255,100)
-killerList.ScrollBarThickness = 6
-killerList.Visible = false
-killerList.Parent = killerFrame
-
-local killerLayout = Instance.new("UIListLayout")
-killerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-killerLayout.Parent = killerList
-
-local killerAbilities = {"Howl","Stalk","Unshroud","Implement","Flight","Detonate"}
-local killerValue = nil
-
-for i, name in ipairs(killerAbilities) do
-	local opt = Instance.new("TextButton")
-	opt.Size = UDim2.new(1,-10,0,22)
-	opt.BackgroundColor3 = Color3.new(0,0,0)
-	opt.BorderColor3 = Color3.fromRGB(100,255,100)
-	opt.Text = name
-	opt.TextColor3 = Color3.new(1,1,1)
-	opt.Font = Enum.Font.SourceSans
-	opt.LayoutOrder = i
-	opt.Parent = killerList
-	opt.MouseButton1Click:Connect(function()
-		killerValue = name
-		killerDropdown.Text = "Selected: " .. name
-		killerList.Visible = false
+	dropdown.MouseButton1Click:Connect(function()
+		list.Visible = not list.Visible
 	end)
+
+	local runBtn = Instance.new("TextButton")
+	runBtn.Size = UDim2.new(0,100,0,30)
+	runBtn.Position = UDim2.new(0.5,-50,0,255)  -- CỐ ĐỊNH DƯỚI CÙNG
+	runBtn.Text = "Run"
+	runBtn.TextColor3 = Color3.new(1,1,1)
+	runBtn.BackgroundColor3 = Color3.new(0,0,0)
+	runBtn.BorderColor3 = Color3.fromRGB(100,255,100)
+	runBtn.Parent = frame
+
+	runBtn.MouseButton1Click:Connect(function()
+		if value then
+			pcall(function()
+				Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(value)
+				showNotification("Ran: " .. value, name == "Killer Ability" and Color3.fromRGB(255,100,100) or Color3.fromRGB(100,255,100))
+			end)
+		end
+	end)
+
+	return frame
 end
-killerList.CanvasSize = UDim2.new(0,0,0, #killerAbilities * 24)
 
-killerDropdown.MouseButton1Click:Connect(function()
-	killerList.Visible = not killerList.Visible
-end)
-
-local killerBtn = Instance.new("TextButton")
-killerBtn.Size = UDim2.new(0,100,0,30)
-killerBtn.Position = UDim2.new(0.5,-50,0,195)
-killerBtn.Text = "Run"
-killerBtn.TextColor3 = Color3.new(1,1,1)
-killerBtn.BackgroundColor3 = Color3.new(0,0,0)
-killerBtn.BorderColor3 = Color3.fromRGB(100,255,100)
-killerBtn.Parent = killerFrame
-
-killerBtn.MouseButton1Click:Connect(function()
-	if killerValue then
-		pcall(function()
-			Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(killerValue)
-			showNotification("Killer Ran: " .. killerValue, Color3.fromRGB(255, 100, 100))
-		end)
-	end
-end)
+local runFrame = createRunTab("Ability", options, tabContainer)
+local killerFrame = createRunTab("Killer Ability", {"Howl","Stalk","Unshroud","Implement","Flight","Detonate"}, tabContainer)
 
 -----------------------------------------------------------------
 -- Chuyển tab
@@ -452,13 +373,11 @@ chooseTab.MouseButton1Click:Connect(function()
 	runFrame.Visible = false
 	killerFrame.Visible = false
 end)
-
 runTab.MouseButton1Click:Connect(function()
 	chooseFrame.Visible = false
 	runFrame.Visible = true
 	killerFrame.Visible = false
 end)
-
 killerTab.MouseButton1Click:Connect(function()
 	chooseFrame.Visible = false
 	runFrame.Visible = false
@@ -466,20 +385,14 @@ killerTab.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------------
--- Version (update từ GitHub)
+-- Version
 -----------------------------------------------------------------
 local version = Instance.new("TextLabel")
-version.Size = UDim2.new(0,220,0,20)
+version.Size = UDim2.new(0,250,0,20)
 version.Position = UDim2.new(0,5,1,-22)
 version.BackgroundTransparency = 1
-version.Text = "CUBEDoD indev 0.3"
+version.Text = "indev 0.4 - Fixed Run button overflow"
 version.Font = Enum.Font.SourceSans
 version.TextSize = 14
 version.TextColor3 = Color3.fromRGB(120,255,120)
 version.Parent = mainFrame
-
--- Cleanup saved values on respawn
-Player.CharacterAdded:Connect(function()
-	if PlayerGui:FindFirstChild("SavedValue1") then PlayerGui.SavedValue1:Destroy() end
-	if PlayerGui:FindFirstChild("SavedValue2") then PlayerGui.SavedValue2:Destroy() end
-end)
