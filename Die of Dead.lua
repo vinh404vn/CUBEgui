@@ -1,14 +1,14 @@
 --[[
-	CUBE_AbilityGui indev 0.2 (vinh404)
-	- Tab 1: 2 Dropdown (giống Tab 2) thay TextBox
-	- Tab 2: Run Ability
-	- Tab 3: Killer Ability
-	- Tất cả dropdown dùng ScrollingFrame + UIListLayout
+	CUBE_AbilityGui indev 0.3 (vinh404 - based on GitHub indev 0.2)
+	- Tab 1: 2 Dropdown → FireServer({value1, value2})
+	- Tab 2/3: Run Ability với notification
+	- Thêm: Auto-save state + Success notification (từ Die of Dead.lua)
 --]]
 
 local Players      = game:GetService("Players")
 local Replicated   = game:GetService("ReplicatedStorage")
 local Events       = Replicated:WaitForChild("Events")
+local TweenService = game:GetService("TweenService")
 local Player       = Players.LocalPlayer
 local PlayerGui    = Player:WaitForChild("PlayerGui")
 
@@ -17,7 +17,43 @@ local old = PlayerGui:FindFirstChild("CUBE_AbilityGui")
 if old then old:Destroy() end
 
 -----------------------------------------------------------------
--- GUI chính
+-- Notification System (từ Die of Dead.lua)
+-----------------------------------------------------------------
+local function showNotification(text, color)
+	local notif = Instance.new("ScreenGui", PlayerGui)
+	notif.Name = "CUBE_Notif"
+	notif.ResetOnSpawn = false
+	
+	local frame = Instance.new("Frame", notif)
+	frame.Size = UDim2.new(0, 300, 0, 50)
+	frame.Position = UDim2.new(0.5, -150, 0, -60)
+	frame.BackgroundColor3 = color or Color3.fromRGB(100, 255, 100)
+	frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+	frame.BorderSizePixel = 2
+	frame.Parent = notif
+	
+	local label = Instance.new("TextLabel", frame)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.new(0, 0, 0)
+	label.Font = Enum.Font.SourceSansBold
+	label.TextSize = 16
+	label.TextScaled = true
+	
+	-- Tween animation
+	local tweenIn = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(0.5, -150, 0, 20)})
+	tweenIn:Play()
+	
+	task.delay(3, function()
+		local tweenOut = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {Position = UDim2.new(0.5, -150, 0, -60)})
+		tweenOut:Play()
+		tweenOut.Completed:Connect(function() notif:Destroy() end)
+	end)
+end
+
+-----------------------------------------------------------------
+-- GUI chính (tăng height cho dropdown)
 -----------------------------------------------------------------
 local gui = Instance.new("ScreenGui")
 gui.Name = "CUBE_AbilityGui"
@@ -25,7 +61,7 @@ gui.ResetOnSpawn = false
 gui.Parent = PlayerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 240)
+mainFrame.Size = UDim2.new(0, 360, 0, 280)  -- Tăng height từ 240 → 280
 mainFrame.Position = UDim2.new(0.35, 0, 0.35, 0)
 mainFrame.BackgroundColor3 = Color3.new(0,0,0)
 mainFrame.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -38,7 +74,7 @@ mainFrame.Parent = gui
 local titleBar = Instance.new("TextLabel")
 titleBar.Size = UDim2.new(1,0,0,25)
 titleBar.BackgroundColor3 = Color3.new(0,0,0)
-titleBar.Text = "CUBE_AbilityGui"
+titleBar.Text = "CUBE_AbilityGui v2.2"
 titleBar.TextColor3 = Color3.fromRGB(150,255,150)
 titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 16
@@ -117,7 +153,7 @@ tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = mainFrame
 
 -----------------------------------------------------------------
--- TAB 1: 2 Dropdown (thay TextBox)
+-- TAB 1: 2 Dropdown (với auto-save state)
 -----------------------------------------------------------------
 local chooseFrame = Instance.new("Frame")
 chooseFrame.Size = UDim2.new(1,0,1,0)
@@ -125,11 +161,15 @@ chooseFrame.BackgroundTransparency = 1
 chooseFrame.Visible = true
 chooseFrame.Parent = tabContainer
 
+-- Load saved state
+local savedValue1 = PlayerGui:FindFirstChild("SavedValue1") and PlayerGui.SavedValue1.Value or nil
+local savedValue2 = PlayerGui:FindFirstChild("SavedValue2") and PlayerGui.SavedValue2.Value or nil
+
 -- Dropdown 1
 local dropdown1 = Instance.new("TextButton")
 dropdown1.Size = UDim2.new(1,-20,0,30)
 dropdown1.Position = UDim2.new(0,10,0,10)
-dropdown1.Text = "Select Value1"
+dropdown1.Text = savedValue1 and ("Value1: " .. savedValue1) or "Select Value1"
 dropdown1.TextColor3 = Color3.new(1,1,1)
 dropdown1.BackgroundColor3 = Color3.new(0,0,0)
 dropdown1.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -152,7 +192,7 @@ layout1.Parent = list1
 local dropdown2 = Instance.new("TextButton")
 dropdown2.Size = UDim2.new(1,-20,0,30)
 dropdown2.Position = UDim2.new(0,10,0,170)
-dropdown2.Text = "Select Value2"
+dropdown2.Text = savedValue2 and ("Value2: " .. savedValue2) or "Select Value2"
 dropdown2.TextColor3 = Color3.new(1,1,1)
 dropdown2.BackgroundColor3 = Color3.new(0,0,0)
 dropdown2.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -177,8 +217,8 @@ local options = {
 	"Hotdog","Dash","Cloak","Adrenaline","Taunt"
 }
 
-local value1 = nil
-local value2 = nil
+local value1 = savedValue1
+local value2 = savedValue2
 
 -- Tạo option cho dropdown 1
 for i, name in ipairs(options) do
@@ -195,6 +235,10 @@ for i, name in ipairs(options) do
 		value1 = name
 		dropdown1.Text = "Value1: " .. name
 		list1.Visible = false
+		-- Auto-save
+		local save1 = Instance.new("StringValue", PlayerGui)
+		save1.Name = "SavedValue1"
+		save1.Value = name
 	end)
 end
 list1.CanvasSize = UDim2.new(0,0,0, #options * 24)
@@ -214,6 +258,10 @@ for i, name in ipairs(options) do
 		value2 = name
 		dropdown2.Text = "Value2: " .. name
 		list2.Visible = false
+		-- Auto-save
+		local save2 = Instance.new("StringValue", PlayerGui)
+		save2.Name = "SavedValue2"
+		save2.Value = name
 	end)
 end
 list2.CanvasSize = UDim2.new(0,0,0, #options * 24)
@@ -229,7 +277,7 @@ dropdown2.MouseButton1Click:Connect(function()
 	list1.Visible = false
 end)
 
--- Nút Execute
+-- Nút Execute (với notification)
 local executeBtn = Instance.new("TextButton")
 executeBtn.Size = UDim2.new(0,100,0,30)
 executeBtn.Position = UDim2.new(0.5,-50,0,335)
@@ -241,12 +289,17 @@ executeBtn.Parent = chooseFrame
 
 executeBtn.MouseButton1Click:Connect(function()
 	if value1 and value2 then
-		Events:WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer(value1, value2)
+		pcall(function()
+			Events:WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer({value1, value2})
+			showNotification("Executed: " .. value1 .. " + " .. value2, Color3.fromRGB(100, 255, 100))
+		end)
+	else
+		showNotification("Chọn cả 2 value!", Color3.fromRGB(255, 100, 100))
 	end
 end)
 
 -----------------------------------------------------------------
--- TAB 2: Run Ability
+-- TAB 2: Run Ability (giữ nguyên, thêm notif)
 -----------------------------------------------------------------
 local runFrame = Instance.new("Frame")
 runFrame.Size = UDim2.new(1,0,1,0)
@@ -310,12 +363,15 @@ runBtn.Parent = runFrame
 
 runBtn.MouseButton1Click:Connect(function()
 	if runValue then
-		Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(runValue)
+		pcall(function()
+			Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(runValue)
+			showNotification("Ran: " .. runValue, Color3.fromRGB(100, 255, 100))
+		end)
 	end
 end)
 
 -----------------------------------------------------------------
--- TAB 3: Killer Ability
+-- TAB 3: Killer Ability (giữ nguyên, thêm notif)
 -----------------------------------------------------------------
 local killerFrame = Instance.new("Frame")
 killerFrame.Size = UDim2.new(1,0,1,0)
@@ -381,7 +437,10 @@ killerBtn.Parent = killerFrame
 
 killerBtn.MouseButton1Click:Connect(function()
 	if killerValue then
-		Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(killerValue)
+		pcall(function()
+			Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(killerValue)
+			showNotification("Killer Ran: " .. killerValue, Color3.fromRGB(255, 100, 100))
+		end)
 	end
 end)
 
@@ -407,14 +466,20 @@ killerTab.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------------
--- Version
+-- Version (update từ GitHub)
 -----------------------------------------------------------------
 local version = Instance.new("TextLabel")
 version.Size = UDim2.new(0,220,0,20)
 version.Position = UDim2.new(0,5,1,-22)
 version.BackgroundTransparency = 1
-version.Text = "CUBE_AbilityGui indev 0.2 (idiot)"
+version.Text = "CUBEDoD indev 0.3"
 version.Font = Enum.Font.SourceSans
 version.TextSize = 14
 version.TextColor3 = Color3.fromRGB(120,255,120)
 version.Parent = mainFrame
+
+-- Cleanup saved values on respawn
+Player.CharacterAdded:Connect(function()
+	if PlayerGui:FindFirstChild("SavedValue1") then PlayerGui.SavedValue1:Destroy() end
+	if PlayerGui:FindFirstChild("SavedValue2") then PlayerGui.SavedValue2:Destroy() end
+end)
