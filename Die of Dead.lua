@@ -1,9 +1,9 @@
 --[[
-	CUBEDoD indev 0.4 (vinh404)
-	- SỬA: Nút Run bị tràn → tăng height + reposition
-	- Tab 1: 2 Dropdown (13px gap, overlay đúng)
-	- Tab 2/3: Run + Killer → nút Run luôn ở dưới
-	- Auto-save + Notification
+	CUBE_DoD - indev 0.4+ (vinh404)
+	- Version tăng thủ công: thay BASE_VERSION khi update
+	- Bắt đầu: 0.4 → 0.5 → 0.6...
+	- Notification: góc trên bên phải
+	- GUI: CUBE_DoD
 --]]
 
 local Players      = game:GetService("Players")
@@ -13,54 +13,77 @@ local TweenService = game:GetService("TweenService")
 local Player       = Players.LocalPlayer
 local PlayerGui    = Player:WaitForChild("PlayerGui")
 
--- Xóa GUI cũ
-local old = PlayerGui:FindFirstChild("CUBE_AbilityGui")
+-- XÓA GUI CŨ
+local old = PlayerGui:FindFirstChild("CUBE_DoD")
 if old then old:Destroy() end
 
 -----------------------------------------------------------------
--- Notification System
+-- VERSION: TĂNG THỦ CÔNG KHI UPDATE GITHUB
 -----------------------------------------------------------------
+local BASE_VERSION = 0.5   -- THAY ĐỔI DÒNG NÀY KHI BẠN UPDATE: 0.5, 0.6, 0.7...
+
+-----------------------------------------------------------------
+-- Notification System (GÓC TRÊN BÊN PHẢI)
+-----------------------------------------------------------------
+local notifContainer = Instance.new("Frame")
+notifContainer.Size = UDim2.new(0, 300, 0, 0)
+notifContainer.Position = UDim2.new(1, -320, 0, 20)
+notifContainer.BackgroundTransparency = 1
+notifContainer.ClipsDescendants = true
+notifContainer.Parent = PlayerGui
+
+local notifLayout = Instance.new("UIListLayout")
+notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
+notifLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+notifLayout.Padding = UDim.new(0, 8)
+notifLayout.Parent = notifContainer
+
 local function showNotification(text, color)
-	local notif = Instance.new("ScreenGui", PlayerGui)
-	notif.Name = "CUBE_Notif"
-	notif.ResetOnSpawn = false
-	
-	local frame = Instance.new("Frame", notif)
-	frame.Size = UDim2.new(0, 300, 0, 50)
-	frame.Position = UDim2.new(0.5, -150, 0, -60)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1, 0, 0, 50)
 	frame.BackgroundColor3 = color or Color3.fromRGB(100, 255, 100)
 	frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
 	frame.BorderSizePixel = 2
-	
-	local label = Instance.new("TextLabel", frame)
-	label.Size = UDim2.new(1, 0, 1, 0)
+	frame.Position = UDim2.new(1, 20, 0, 0)
+	frame.Parent = notifContainer
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -10, 1, 0)
+	label.Position = UDim2.new(0, 5, 0, 0)
 	label.BackgroundTransparency = 1
 	label.Text = text
 	label.TextColor3 = Color3.new(0, 0, 0)
 	label.Font = Enum.Font.SourceSansBold
 	label.TextSize = 16
+	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextScaled = true
-	
-	local tweenIn = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(0.5, -150, 0, 20)})
+	label.Parent = frame
+
+	local tweenIn = TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Position = UDim2.new(0, 0, 0, 0)})
 	tweenIn:Play()
-	
+
 	task.delay(3, function()
-		local tweenOut = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {Position = UDim2.new(0.5, -150, 0, -60)})
+		local tweenOut = TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {Position = UDim2.new(1, 20, 0, 0)})
 		tweenOut:Play()
-		tweenOut.Completed:Connect(function() notif:Destroy() end)
+		tweenOut.Completed:Connect(function()
+			frame:Destroy()
+			notifContainer.Size = UDim2.new(0, 300, 0, notifLayout.AbsoluteContentSize.Y)
+		end)
 	end)
+
+	notifContainer.Size = UDim2.new(0, 300, 0, notifLayout.AbsoluteContentSize.Y + 60)
 end
 
 -----------------------------------------------------------------
--- GUI chính (TĂNG HEIGHT ĐỂ KHÔNG BỊ TRÀN)
+-- GUI chính
 -----------------------------------------------------------------
 local gui = Instance.new("ScreenGui")
-gui.Name = "CUBE_AbilityGui"
+gui.Name = "CUBE_DoD"
 gui.ResetOnSpawn = false
 gui.Parent = PlayerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 300)  -- Tăng từ 240 → 300
+mainFrame.Size = UDim2.new(0, 360, 0, 300)
 mainFrame.Position = UDim2.new(0.35, 0, 0.35, 0)
 mainFrame.BackgroundColor3 = Color3.new(0,0,0)
 mainFrame.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -73,7 +96,7 @@ mainFrame.Parent = gui
 local titleBar = Instance.new("TextLabel")
 titleBar.Size = UDim2.new(1,0,0,25)
 titleBar.BackgroundColor3 = Color3.new(0,0,0)
-titleBar.Text = "CUBE_AbilityGui v2.4"
+titleBar.Text = "CUBE_DoD"
 titleBar.TextColor3 = Color3.fromRGB(150,255,150)
 titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 16
@@ -95,7 +118,7 @@ showBtn.Size = UDim2.new(0,100,0,30)
 showBtn.Position = UDim2.new(0,10,0,10)
 showBtn.BackgroundColor3 = Color3.new(0,0,0)
 showBtn.BorderColor3 = Color3.fromRGB(100,255,100)
-showBtn.Text = "Show GUI"
+showBtn.Text = "Show DoD"
 showBtn.TextColor3 = Color3.fromRGB(150,255,150)
 showBtn.Font = Enum.Font.SourceSansBold
 showBtn.Visible = false
@@ -121,7 +144,7 @@ tabFrame.Parent = mainFrame
 
 local chooseTab = Instance.new("TextButton")
 chooseTab.Size = UDim2.new(1/3,0,1,0)
-chooseTab.Text = "Ability Choose"
+chooseTab.Text = "Choose"
 chooseTab.TextColor3 = Color3.fromRGB(150,255,150)
 chooseTab.BackgroundColor3 = Color3.new(0,0,0)
 chooseTab.Font = Enum.Font.SourceSansBold
@@ -130,7 +153,7 @@ chooseTab.Parent = tabFrame
 local runTab = Instance.new("TextButton")
 runTab.Size = UDim2.new(1/3,0,1,0)
 runTab.Position = UDim2.new(1/3,0,0,0)
-runTab.Text = "Run Ability"
+runTab.Text = "Run"
 runTab.TextColor3 = Color3.fromRGB(150,255,150)
 runTab.BackgroundColor3 = Color3.new(0,0,0)
 runTab.Font = Enum.Font.SourceSansBold
@@ -139,7 +162,7 @@ runTab.Parent = tabFrame
 local killerTab = Instance.new("TextButton")
 killerTab.Size = UDim2.new(1/3,0,1,0)
 killerTab.Position = UDim2.new(2/3,0,0,0)
-killerTab.Text = "Killer Ability"
+killerTab.Text = "Killer"
 killerTab.TextColor3 = Color3.fromRGB(150,255,150)
 killerTab.BackgroundColor3 = Color3.new(0,0,0)
 killerTab.Font = Enum.Font.SourceSansBold
@@ -152,7 +175,7 @@ tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = mainFrame
 
 -----------------------------------------------------------------
--- TAB 1: 2 Dropdown (13px gap + overlay)
+-- TAB 1: Choose
 -----------------------------------------------------------------
 local chooseFrame = Instance.new("Frame")
 chooseFrame.Size = UDim2.new(1,0,1,0)
@@ -160,14 +183,14 @@ chooseFrame.BackgroundTransparency = 1
 chooseFrame.Visible = true
 chooseFrame.Parent = tabContainer
 
-local savedValue1 = PlayerGui:FindFirstChild("SavedValue1") and PlayerGui.SavedValue1.Value or nil
-local savedValue2 = PlayerGui:FindFirstChild("SavedValue2") and PlayerGui.SavedValue2.Value or nil
+local savedValue1 = PlayerGui:FindFirstChild("DoD_Value1") and PlayerGui.DoD_Value1.Value or nil
+local savedValue2 = PlayerGui:FindFirstChild("DoD_Value2") and PlayerGui.DoD_Value2.Value or nil
 
--- Dropdown 1 (trên)
+-- Dropdown 1
 local dropdown1 = Instance.new("TextButton")
 dropdown1.Size = UDim2.new(1,-20,0,30)
 dropdown1.Position = UDim2.new(0,10,0,10)
-dropdown1.Text = savedValue1 and ("Value1: " .. savedValue1) or "Select Value1"
+dropdown1.Text = savedValue1 and ("1: " .. savedValue1) or "Select Value 1"
 dropdown1.TextColor3 = Color3.new(1,1,1)
 dropdown1.BackgroundColor3 = Color3.new(0,0,0)
 dropdown1.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -188,11 +211,11 @@ local layout1 = Instance.new("UIListLayout")
 layout1.SortOrder = Enum.SortOrder.LayoutOrder
 layout1.Parent = list1
 
--- Dropdown 2 (dưới, cách 13px)
+-- Dropdown 2
 local dropdown2 = Instance.new("TextButton")
 dropdown2.Size = UDim2.new(1,-20,0,30)
-dropdown2.Position = UDim2.new(0,10,0,53)  -- 10 + 30 + 13
-dropdown2.Text = savedValue2 and ("Value2: " .. savedValue2) or "Select Value2"
+dropdown2.Position = UDim2.new(0,10,0,53)
+dropdown2.Text = savedValue2 and ("2: " .. savedValue2) or "Select Value 2"
 dropdown2.TextColor3 = Color3.new(1,1,1)
 dropdown2.BackgroundColor3 = Color3.new(0,0,0)
 dropdown2.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -230,11 +253,11 @@ for i, name in ipairs(options) do
 	opt1.Parent = list1
 	opt1.MouseButton1Click:Connect(function()
 		value1 = name
-		dropdown1.Text = "Value1: " .. name
+		dropdown1.Text = "1: " .. name
 		list1.Visible = false
 		list2.Visible = false
-		local save = PlayerGui:FindFirstChild("SavedValue1") or Instance.new("StringValue", PlayerGui)
-		save.Name = "SavedValue1"
+		local save = PlayerGui:FindFirstChild("DoD_Value1") or Instance.new("StringValue", PlayerGui)
+		save.Name = "DoD_Value1"
 		save.Value = name
 	end)
 
@@ -243,11 +266,11 @@ for i, name in ipairs(options) do
 	opt2.Parent = list2
 	opt2.MouseButton1Click:Connect(function()
 		value2 = name
-		dropdown2.Text = "Value2: " .. name
+		dropdown2.Text = "2: " .. name
 		list2.Visible = false
 		list1.Visible = false
-		local save = PlayerGui:FindFirstChild("SavedValue2") or Instance.new("StringValue", PlayerGui)
-		save.Name = "SavedValue2"
+		local save = PlayerGui:FindFirstChild("DoD_Value2") or Instance.new("StringValue", PlayerGui)
+		save.Name = "DoD_Value2"
 		save.Value = name
 	end)
 end
@@ -267,7 +290,7 @@ end)
 
 local executeBtn = Instance.new("TextButton")
 executeBtn.Size = UDim2.new(0,100,0,30)
-executeBtn.Position = UDim2.new(0.5,-50,0,255)  -- Dưới dropdown 2
+executeBtn.Position = UDim2.new(0.5,-50,0,255)
 executeBtn.Text = "Execute"
 executeBtn.TextColor3 = Color3.new(1,1,1)
 executeBtn.BackgroundColor3 = Color3.new(0,0,0)
@@ -282,24 +305,25 @@ executeBtn.MouseButton1Click:Connect(function()
 			showNotification("Sent: " .. value1 .. " + " .. value2, Color3.fromRGB(100, 255, 100))
 		end)
 	else
-		showNotification("Chọn cả 2!", Color3.fromRGB(255, 100, 100))
+		showNotification("Chọn cả 2 value!", Color3.fromRGB(255, 100, 100))
 	end
 end)
 
 -----------------------------------------------------------------
--- TAB 2 & 3: Run + Killer (nút Run ở y=255)
+-- TAB 2 & 3: Run + Killer
 -----------------------------------------------------------------
-local function createRunTab(name, abilities, parentFrame)
+local function createRunTab(tabName, abilities, frameName)
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.new(1,0,1,0)
 	frame.BackgroundTransparency = 1
 	frame.Visible = false
-	frame.Parent = parentFrame
+	frame.Name = frameName
+	frame.Parent = tabContainer
 
 	local dropdown = Instance.new("TextButton")
 	dropdown.Size = UDim2.new(1,-20,0,30)
 	dropdown.Position = UDim2.new(0,10,0,10)
-	dropdown.Text = "Select " .. name
+	dropdown.Text = "Select " .. tabName
 	dropdown.TextColor3 = Color3.new(1,1,1)
 	dropdown.BackgroundColor3 = Color3.new(0,0,0)
 	dropdown.BorderColor3 = Color3.fromRGB(100,255,100)
@@ -331,7 +355,7 @@ local function createRunTab(name, abilities, parentFrame)
 		opt.Parent = list
 		opt.MouseButton1Click:Connect(function()
 			value = ab
-			dropdown.Text = "Selected: " .. ab
+			dropdown.Text = ab
 			list.Visible = false
 		end)
 	end
@@ -343,7 +367,7 @@ local function createRunTab(name, abilities, parentFrame)
 
 	local runBtn = Instance.new("TextButton")
 	runBtn.Size = UDim2.new(0,100,0,30)
-	runBtn.Position = UDim2.new(0.5,-50,0,255)  -- CỐ ĐỊNH DƯỚI CÙNG
+	runBtn.Position = UDim2.new(0.5,-50,0,255)
 	runBtn.Text = "Run"
 	runBtn.TextColor3 = Color3.new(1,1,1)
 	runBtn.BackgroundColor3 = Color3.new(0,0,0)
@@ -354,7 +378,7 @@ local function createRunTab(name, abilities, parentFrame)
 		if value then
 			pcall(function()
 				Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(value)
-				showNotification("Ran: " .. value, name == "Killer Ability" and Color3.fromRGB(255,100,100) or Color3.fromRGB(100,255,100))
+				showNotification("Ran: " .. value, tabName == "Killer" and Color3.fromRGB(255,100,100) or Color3.fromRGB(100,255,100))
 			end)
 		end
 	end)
@@ -362,8 +386,8 @@ local function createRunTab(name, abilities, parentFrame)
 	return frame
 end
 
-local runFrame = createRunTab("Ability", options, tabContainer)
-local killerFrame = createRunTab("Killer Ability", {"Howl","Stalk","Unshroud","Implement","Flight","Detonate"}, tabContainer)
+local runFrame = createRunTab("Ability", options, "RunFrame")
+local killerFrame = createRunTab("Killer", {"Howl","Stalk","Unshroud","Implement","Flight","Detonate"}, "KillerFrame")
 
 -----------------------------------------------------------------
 -- Chuyển tab
@@ -385,14 +409,21 @@ killerTab.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------------
--- Version
+-- Version Label (hiển thị BASE_VERSION)
 -----------------------------------------------------------------
 local version = Instance.new("TextLabel")
 version.Size = UDim2.new(0,250,0,20)
 version.Position = UDim2.new(0,5,1,-22)
 version.BackgroundTransparency = 1
-version.Text = "indev 0.4 - Fixed Run button overflow"
+version.Text = "CUBE_DoD - indev " .. string.format("%.1f", BASE_VERSION)
 version.Font = Enum.Font.SourceSans
 version.TextSize = 14
 version.TextColor3 = Color3.fromRGB(120,255,120)
 version.Parent = mainFrame
+
+-- Cleanup on respawn
+Player.CharacterAdded:Connect(function()
+	for _, v in pairs({"DoD_Value1", "DoD_Value2"}) do
+		if PlayerGui:FindFirstChild(v) then PlayerGui[v]:Destroy() end
+	end
+end)
