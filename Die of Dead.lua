@@ -22,7 +22,7 @@ if old then old:Destroy() end
 -----------------------------------------------------------------
 local BASE_VERSION = 0.5   -- Thay đổi khi update
 local HOTFIX = true
-local HOTFIX_VERSION = 0.02
+local HOTFIX_VERSION = 0.03
 -----------------------------------------------------------------
 -- Notification System (GÓC TRÊN BÊN PHẢI)
 -----------------------------------------------------------------
@@ -502,7 +502,7 @@ version.Size = UDim2.new(0,250,0,20)
 version.Position = UDim2.new(0,5,1,-22)
 version.BackgroundTransparency = 1
 if HOTFIX then
-    version.Text = "CUBE_DoD - indevHOTFIX " .. string.format("%..1f", BASE_VERSION + HOTFIX_VERSION)
+    version.Text = "CUBE_DoD - indevHOTFIX " .. string.format("%.2f", BASE_VERSION + HOTFIX_VERSION)
 else
     version.Text = "CUBE_DoD - indev " .. string.format("%.1f", BASE_VERSION)
 end
