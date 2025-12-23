@@ -502,7 +502,7 @@ version.Size = UDim2.new(0,250,0,20)
 version.Position = UDim2.new(0,5,1,-22)
 version.BackgroundTransparency = 1
 if HOTFIX then
-    version.Text = "CUBE_DoD - indevHOTFIX " .. string.format("%.1f", BASE_VERSION + HOTFIX_VERSION)
+    version.Text = "CUBE_DoD - indevHOTFIX " .. string.format("%..1f", BASE_VERSION + HOTFIX_VERSION)
 else
     version.Text = "CUBE_DoD - indev " .. string.format("%.1f", BASE_VERSION)
 end
