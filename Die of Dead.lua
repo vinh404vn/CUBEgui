@@ -20,8 +20,9 @@ if old then old:Destroy() end
 -----------------------------------------------------------------
 -- VERSION: TĂNG THỦ CÔNG KHI UPDATE GITHUB
 -----------------------------------------------------------------
-local BASE_VERSION = 0.6   -- THAY ĐỔI DÒNG NÀY KHI BẠN UPDATE: 0.5, 0.6, 0.7...
-
+local BASE_VERSION = 0.5   -- Thay đổi khi update
+local HOTFIX = true
+local HOTFIX_VERSION = 0.02
 -----------------------------------------------------------------
 -- Notification System (GÓC TRÊN BÊN PHẢI)
 -----------------------------------------------------------------
@@ -96,7 +97,7 @@ mainFrame.Parent = gui
 local titleBar = Instance.new("TextLabel")
 titleBar.Size = UDim2.new(1,0,0,25)
 titleBar.BackgroundColor3 = Color3.new(0,0,0)
-titleBar.Text = "CUBE_DoD v" .. BASE_VERSION
+titleBar.Text = "CUBE_DoD"
 titleBar.TextColor3 = Color3.fromRGB(150,255,150)
 titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 16
@@ -134,7 +135,7 @@ showBtn.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------------
--- Tab bar (thêm tab Misc)
+-- Tab bar (bây giờ có 4 tab)
 -----------------------------------------------------------------
 local tabFrame = Instance.new("Frame")
 tabFrame.Size = UDim2.new(1,0,0,30)
@@ -142,35 +143,40 @@ tabFrame.Position = UDim2.new(0,0,0,25)
 tabFrame.BackgroundColor3 = Color3.fromRGB(15,15,15)
 tabFrame.Parent = mainFrame
 
-local tabs = {}
-local frames = {}
+local chooseTab = Instance.new("TextButton")
+chooseTab.Size = UDim2.new(0.25,0,1,0)
+chooseTab.Text = "Choose"
+chooseTab.TextColor3 = Color3.fromRGB(150,255,150)
+chooseTab.BackgroundColor3 = Color3.new(0,0,0)
+chooseTab.Font = Enum.Font.SourceSansBold
+chooseTab.Parent = tabFrame
 
-local function createTab(name)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1/4,0,1,0)
-	btn.Position = UDim2.new((#tabs)/4,0,0,0)
-	btn.Text = name
-	btn.TextColor3 = Color3.fromRGB(150,255,150)
-	btn.BackgroundColor3 = Color3.new(0,0,0)
-	btn.Font = Enum.Font.SourceSansBold
-	btn.Parent = tabFrame
-	
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(1,0,1,0)
-	frame.BackgroundTransparency = 1
-	frame.Visible = false
-	frame.Parent = tabContainer
-	
-	table.insert(tabs, btn)
-	table.insert(frames, frame)
-	
-	btn.MouseButton1Click:Connect(function()
-		for i,v in ipairs(frames) do v.Visible = (v == frame) end
-		showNotification("Tab: " .. name)
-	end)
-	
-	return frame
-end
+local runTab = Instance.new("TextButton")
+runTab.Size = UDim2.new(0.25,0,1,0)
+runTab.Position = UDim2.new(0.25,0,0,0)
+runTab.Text = "Run"
+runTab.TextColor3 = Color3.fromRGB(150,255,150)
+runTab.BackgroundColor3 = Color3.new(0,0,0)
+runTab.Font = Enum.Font.SourceSansBold
+runTab.Parent = tabFrame
+
+local killerTab = Instance.new("TextButton")
+killerTab.Size = UDim2.new(0.25,0,1,0)
+killerTab.Position = UDim2.new(0.5,0,0,0)
+killerTab.Text = "Killer"
+killerTab.TextColor3 = Color3.fromRGB(150,255,150)
+killerTab.BackgroundColor3 = Color3.new(0,0,0)
+killerTab.Font = Enum.Font.SourceSansBold
+killerTab.Parent = tabFrame
+
+local miscTab = Instance.new("TextButton")
+miscTab.Size = UDim2.new(0.25,0,1,0)
+miscTab.Position = UDim2.new(0.75,0,0,0)
+miscTab.Text = "Misc"
+miscTab.TextColor3 = Color3.fromRGB(150,255,150)
+miscTab.BackgroundColor3 = Color3.new(0,0,0)
+miscTab.Font = Enum.Font.SourceSansBold
+miscTab.Parent = tabFrame
 
 local tabContainer = Instance.new("Frame")
 tabContainer.Size = UDim2.new(1,-10,1,-65)
@@ -178,22 +184,19 @@ tabContainer.Position = UDim2.new(0,5,0,60)
 tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = mainFrame
 
--- Các tab cũ
-local chooseFrame = createTab("Choose")
-local runFrame    = createTab("Run")
-local killerFrame = createTab("Killer")
-local miscFrame   = createTab("Misc")  -- TAB MỚI
-
--- Mở tab Choose mặc định
+-----------------------------------------------------------------
+-- TAB 1: Choose (giữ nguyên hoàn toàn)
+-----------------------------------------------------------------
+local chooseFrame = Instance.new("Frame")
+chooseFrame.Size = UDim2.new(1,0,1,0)
+chooseFrame.BackgroundTransparency = 1
 chooseFrame.Visible = true
+chooseFrame.Parent = tabContainer
 
------------------------------------------------------------------
--- TAB 1: Choose (giữ nguyên code gốc của bạn)
------------------------------------------------------------------
 local savedValue1 = PlayerGui:FindFirstChild("DoD_Value1") and PlayerGui.DoD_Value1.Value or nil
 local savedValue2 = PlayerGui:FindFirstChild("DoD_Value2") and PlayerGui.DoD_Value2.Value or nil
 
--- Dropdown 1
+-- Dropdown 1 & 2 + options (giữ nguyên code cũ của bạn)
 local dropdown1 = Instance.new("TextButton")
 dropdown1.Size = UDim2.new(1,-20,0,30)
 dropdown1.Position = UDim2.new(0,10,0,10)
@@ -218,7 +221,6 @@ local layout1 = Instance.new("UIListLayout")
 layout1.SortOrder = Enum.SortOrder.LayoutOrder
 layout1.Parent = list1
 
--- Dropdown 2
 local dropdown2 = Instance.new("TextButton")
 dropdown2.Size = UDim2.new(1,-20,0,30)
 dropdown2.Position = UDim2.new(0,10,0,53)
@@ -300,19 +302,114 @@ executeBtn.Size = UDim2.new(0,100,0,30)
 executeBtn.Position = UDim2.new(0.5,-50,0,255)
 executeBtn.Text = "Execute"
 executeBtn.TextColor3 = Color3.new(1,1,1)
-executeBtn.BackgroundColor3 = Color3.fromRGB(0,100,0)
+executeBtn.BackgroundColor3 = Color3.new(0,0,0)
 executeBtn.BorderColor3 = Color3.fromRGB(100,255,100)
+executeBtn.ZIndex = 10
 executeBtn.Parent = chooseFrame
 
--- (Bạn có thể thêm function cho Execute ở đây nếu cần)
+executeBtn.MouseButton1Click:Connect(function()
+	if value1 and value2 then
+		pcall(function()
+			Events:WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer({value1, value2})
+			showNotification("Sent: " .. value1 .. " + " .. value2, Color3.fromRGB(100, 255, 100))
+		end)
+	else
+		showNotification("Chọn cả 2 value!", Color3.fromRGB(255, 100, 100))
+	end
+end)
 
 -----------------------------------------------------------------
--- TAB Misc: Auto Delete Barrier
+-- TAB 2 & 3: Run + Killer (giữ nguyên function cũ)
 -----------------------------------------------------------------
-local autoDeleteEnabled = false
+local function createRunTab(tabName, abilities, frameName)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1,0,1,0)
+	frame.BackgroundTransparency = 1
+	frame.Visible = false
+	frame.Name = frameName
+	frame.Parent = tabContainer
 
+	local dropdown = Instance.new("TextButton")
+	dropdown.Size = UDim2.new(1,-20,0,30)
+	dropdown.Position = UDim2.new(0,10,0,10)
+	dropdown.Text = "Select " .. tabName
+	dropdown.TextColor3 = Color3.new(1,1,1)
+	dropdown.BackgroundColor3 = Color3.new(0,0,0)
+	dropdown.BorderColor3 = Color3.fromRGB(100,255,100)
+	dropdown.Parent = frame
+
+	local list = Instance.new("ScrollingFrame")
+	list.Size = UDim2.new(1,-20,0,140)
+	list.Position = UDim2.new(0,10,0,45)
+	list.BackgroundColor3 = Color3.fromRGB(10,10,10)
+	list.BorderColor3 = Color3.fromRGB(100,255,100)
+	list.ScrollBarThickness = 6
+	list.Visible = false
+	list.Parent = frame
+
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = list
+
+	local value = nil
+	for i, ab in ipairs(abilities) do
+		local opt = Instance.new("TextButton")
+		opt.Size = UDim2.new(1,-10,0,22)
+		opt.BackgroundColor3 = Color3.new(0,0,0)
+		opt.BorderColor3 = Color3.fromRGB(100,255,100)
+		opt.Text = ab
+		opt.TextColor3 = Color3.new(1,1,1)
+		opt.Font = Enum.Font.SourceSans
+		opt.LayoutOrder = i
+		opt.Parent = list
+		opt.MouseButton1Click:Connect(function()
+			value = ab
+			dropdown.Text = ab
+			list.Visible = false
+		end)
+	end
+	list.CanvasSize = UDim2.new(0,0,0, #abilities * 24)
+
+	dropdown.MouseButton1Click:Connect(function()
+		list.Visible = not list.Visible
+	end)
+
+	local runBtn = Instance.new("TextButton")
+	runBtn.Size = UDim2.new(0,100,0,30)
+	runBtn.Position = UDim2.new(0.5,-50,0,255)
+	runBtn.Text = "Run"
+	runBtn.TextColor3 = Color3.new(1,1,1)
+	runBtn.BackgroundColor3 = Color3.new(0,0,0)
+	runBtn.BorderColor3 = Color3.fromRGB(100,255,100)
+	runBtn.Parent = frame
+
+	runBtn.MouseButton1Click:Connect(function()
+		if value then
+			pcall(function()
+				Events:WaitForChild("RemoteFunctions"):WaitForChild("UseAbility"):InvokeServer(value)
+				showNotification("Ran: " .. value, tabName == "Killer" and Color3.fromRGB(255,100,100) or Color3.fromRGB(100,255,100))
+			end)
+		end
+	end)
+
+	return frame
+end
+
+local runFrame = createRunTab("Ability", options, "RunFrame")
+local killerFrame = createRunTab("Killer", {"Howl","Stalk","Unshroud","Implement","Flight","Detonate"}, "KillerFrame")
+
+-----------------------------------------------------------------
+-- TAB 4: Misc - Auto Delete Barrier
+-----------------------------------------------------------------
+local miscFrame = Instance.new("Frame")
+miscFrame.Size = UDim2.new(1,0,1,0)
+miscFrame.BackgroundTransparency = 1
+miscFrame.Visible = false
+miscFrame.Parent = tabContainer
+
+-- Label
 local toggleLabel = Instance.new("TextLabel")
-toggleLabel.Size = UDim2.new(0.6,0,0,30)
+toggleLabel.Size = UDim2.new(0.65,0,0,30)
 toggleLabel.Position = UDim2.new(0,10,0,20)
 toggleLabel.BackgroundTransparency = 1
 toggleLabel.Text = "Auto Delete Barrier"
@@ -321,14 +418,18 @@ toggleLabel.Font = Enum.Font.SourceSansBold
 toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 toggleLabel.Parent = miscFrame
 
+-- Toggle Button
 local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(0,60,0,30)
-toggleBtn.Position = UDim2.new(1,-70,0,20)
+toggleBtn.Size = UDim2.new(0,70,0,30)
+toggleBtn.Position = UDim2.new(1,-80,0,20)
 toggleBtn.Text = "OFF"
 toggleBtn.TextColor3 = Color3.new(1,0,0)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(50,0,0)
 toggleBtn.BorderColor3 = Color3.fromRGB(100,255,100)
+toggleBtn.Font = Enum.Font.SourceSansBold
 toggleBtn.Parent = miscFrame
+
+local autoDeleteEnabled = false
 
 toggleBtn.MouseButton1Click:Connect(function()
 	autoDeleteEnabled = not autoDeleteEnabled
@@ -336,18 +437,18 @@ toggleBtn.MouseButton1Click:Connect(function()
 		toggleBtn.Text = "ON"
 		toggleBtn.TextColor3 = Color3.fromRGB(0,255,0)
 		toggleBtn.BackgroundColor3 = Color3.fromRGB(0,50,0)
-		showNotification("Auto Delete Barrier: ON")
+		showNotification("Auto Delete Barrier: ON", Color3.fromRGB(100,255,100))
 		
 		spawn(function()
 			while autoDeleteEnabled do
-				task.wait(0.3)  -- Tần suất kiểm tra, có thể giảm xuống 0.1 nếu cần nhanh hơn
+				task.wait(0.3)  -- Có thể giảm xuống 0.1 nếu muốn nhanh hơn
 				
 				local barriersFolder = workspace:FindFirstChild("GameAssets")
 				if barriersFolder then barriersFolder = barriersFolder:FindFirstChild("Map") end
 				if barriersFolder then barriersFolder = barriersFolder:FindFirstChild("Config") end
 				if barriersFolder then barriersFolder = barriersFolder:FindFirstChild("Barriers") end
 				
-				if barriersFolder then
+				if barriersFolder and barriersFolder:IsA("Folder") then
 					for _, item in pairs(barriersFolder:GetChildren()) do
 						item:Destroy()
 					end
@@ -362,5 +463,60 @@ toggleBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Thông báo khởi động
+-----------------------------------------------------------------
+-- Chuyển tab
+-----------------------------------------------------------------
+chooseTab.MouseButton1Click:Connect(function()
+	chooseFrame.Visible = true
+	runFrame.Visible = false
+	killerFrame.Visible = false
+	miscFrame.Visible = false
+end)
+
+runTab.MouseButton1Click:Connect(function()
+	chooseFrame.Visible = false
+	runFrame.Visible = true
+	killerFrame.Visible = false
+	miscFrame.Visible = false
+end)
+
+killerTab.MouseButton1Click:Connect(function()
+	chooseFrame.Visible = false
+	runFrame.Visible = false
+	killerFrame.Visible = true
+	miscFrame.Visible = false
+end)
+
+miscTab.MouseButton1Click:Connect(function()
+	chooseFrame.Visible = false
+	runFrame.Visible = false
+	killerFrame.Visible = false
+	miscFrame.Visible = true
+end)
+
+-----------------------------------------------------------------
+-- Version Label
+-----------------------------------------------------------------
+local version = Instance.new("TextLabel")
+version.Size = UDim2.new(0,250,0,20)
+version.Position = UDim2.new(0,5,1,-22)
+version.BackgroundTransparency = 1
+if HOTFIX then
+    version.Text = "CUBE_DoD - indevHOTFIX " .. string.format("%.1f", BASE_VERSION + HOTFIX_VERSION)
+else
+    version.Text = "CUBE_DoD - indev " .. string.format("%.1f", BASE_VERSION)
+end
+version.Font = Enum.Font.SourceSans
+version.TextSize = 14
+version.TextColor3 = Color3.fromRGB(120,255,120)
+version.Parent = mainFrame
+
+-- Cleanup on respawn
+Player.CharacterAdded:Connect(function()
+	for _, v in pairs({"DoD_Value1", "DoD_Value2"}) do
+		if PlayerGui:FindFirstChild(v) then PlayerGui[v]:Destroy() end
+	end
+end)
+
+-- Thông báo load thành công
 showNotification("CUBE_DoD v" .. BASE_VERSION .. " Loaded!", Color3.fromRGB(100,255,100))
