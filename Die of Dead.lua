@@ -20,9 +20,9 @@ if old then old:Destroy() end
 -----------------------------------------------------------------
 -- VERSION: TĂNG THỦ CÔNG KHI UPDATE GITHUB
 -----------------------------------------------------------------
-local BASE_VERSION = 0.5   -- Thay đổi khi update
-local HOTFIX = true
-local HOTFIX_VERSION = 0.03
+local BASE_VERSION = 0.6   -- Thay đổi khi update
+local HOTFIX = false
+local HOTFIX_VERSION = 0.00
 -----------------------------------------------------------------
 -- Notification System (GÓC TRÊN BÊN PHẢI)
 -----------------------------------------------------------------
@@ -399,7 +399,7 @@ local runFrame = createRunTab("Ability", options, "RunFrame")
 local killerFrame = createRunTab("Killer", {"Howl","Stalk","Unshroud","Implement","Flight","Detonate"}, "KillerFrame")
 
 -----------------------------------------------------------------
--- TAB 4: Misc - Auto Delete Barrier
+-- TAB 4: Misc - Auto Delete Barrier + Inf MaxStamina
 -----------------------------------------------------------------
 local miscFrame = Instance.new("Frame")
 miscFrame.Size = UDim2.new(1,0,1,0)
@@ -407,7 +407,7 @@ miscFrame.BackgroundTransparency = 1
 miscFrame.Visible = false
 miscFrame.Parent = tabContainer
 
--- Label
+-- Auto Delete Barrier Toggle
 local toggleLabel = Instance.new("TextLabel")
 toggleLabel.Size = UDim2.new(0.65,0,0,30)
 toggleLabel.Position = UDim2.new(0,10,0,20)
@@ -418,7 +418,6 @@ toggleLabel.Font = Enum.Font.SourceSansBold
 toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 toggleLabel.Parent = miscFrame
 
--- Toggle Button
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Size = UDim2.new(0,70,0,30)
 toggleBtn.Position = UDim2.new(1,-80,0,20)
@@ -441,7 +440,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 		
 		spawn(function()
 			while autoDeleteEnabled do
-				task.wait(0.3)  -- Có thể giảm xuống 0.1 nếu muốn nhanh hơn
+				task.wait(0.3)
 				
 				local barriersFolder = workspace:FindFirstChild("GameAssets")
 				if barriersFolder then barriersFolder = barriersFolder:FindFirstChild("Map") end
@@ -460,6 +459,63 @@ toggleBtn.MouseButton1Click:Connect(function()
 		toggleBtn.TextColor3 = Color3.new(1,0,0)
 		toggleBtn.BackgroundColor3 = Color3.fromRGB(50,0,0)
 		showNotification("Auto Delete Barrier: OFF")
+	end
+end)
+
+-- Inf MaxStamina Toggle
+local staminaLabel = Instance.new("TextLabel")
+staminaLabel.Size = UDim2.new(0.65,0,0,30)
+staminaLabel.Position = UDim2.new(0,10,0,60)
+staminaLabel.BackgroundTransparency = 1
+staminaLabel.Text = "Inf MaxStamina"
+staminaLabel.TextColor3 = Color3.fromRGB(200,255,200)
+staminaLabel.Font = Enum.Font.SourceSansBold
+staminaLabel.TextXAlignment = Enum.TextXAlignment.Left
+staminaLabel.Parent = miscFrame
+
+local staminaBtn = Instance.new("TextButton")
+staminaBtn.Size = UDim2.new(0,70,0,30)
+staminaBtn.Position = UDim2.new(1,-80,0,60)
+staminaBtn.Text = "OFF"
+staminaBtn.TextColor3 = Color3.new(1,0,0)
+staminaBtn.BackgroundColor3 = Color3.fromRGB(50,0,0)
+staminaBtn.BorderColor3 = Color3.fromRGB(100,255,100)
+staminaBtn.Font = Enum.Font.SourceSansBold
+staminaBtn.Parent = miscFrame
+
+local infStaminaEnabled = false
+
+staminaBtn.MouseButton1Click:Connect(function()
+	infStaminaEnabled = not infStaminaEnabled
+	if infStaminaEnabled then
+		staminaBtn.Text = "ON"
+		staminaBtn.TextColor3 = Color3.fromRGB(0,255,0)
+		staminaBtn.BackgroundColor3 = Color3.fromRGB(0,50,0)
+		showNotification("Inf MaxStamina: ON", Color3.fromRGB(100,255,100))
+		
+		spawn(function()
+			while infStaminaEnabled do
+				task.wait(0.1)
+				
+				pcall(function()
+					local character = Player.Character
+					if character then
+						local attributes = character:FindFirstChild("Attributes")
+						if attributes then
+							local maxStamina = attributes:FindFirstChild("MaxStamina")
+							if maxStamina and maxStamina:IsA("NumberValue") then
+								maxStamina.Value = 1e+99
+							end
+						end
+					end
+				end)
+			end
+		end)
+	else
+		staminaBtn.Text = "OFF"
+		staminaBtn.TextColor3 = Color3.new(1,0,0)
+		staminaBtn.BackgroundColor3 = Color3.fromRGB(50,0,0)
+		showNotification("Inf MaxStamina: OFF")
 	end
 end)
 
