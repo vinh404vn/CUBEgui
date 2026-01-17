@@ -1,8 +1,8 @@
 --[[
 	updatelog
-    -forgot to change this
+    -delete the module
     -fix the Inf Stamina
-    version: indevHOTFIX 0.63
+    version: indevHOTFIX 0.67
 --]]
 
 local Players      = game:GetService("Players")
@@ -12,7 +12,6 @@ local TweenService = game:GetService("TweenService")
 local Player       = Players.LocalPlayer
 local character    = Player.Character
 local PlayerGui    = Player:WaitForChild("PlayerGui")
-local StaminaModule = Module:RequestModule(LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MainGui"):WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("Movement"))
 
 -- XÓA GUI CŨ
 local old = PlayerGui:FindFirstChild("CUBE_DoD")
@@ -23,8 +22,8 @@ if old then old:Destroy() end
 -----------------------------------------------------------------
 local BASE_VERSION = 0.6   -- Thay đổi khi update
 local HOTFIX = true
-local HOTFIX_VERSION = 0.03
-local jokeText = "i don't think you gonna read this"
+local HOTFIX_VERSION = 0.07
+local jokeText = "67!! kinna funny"
 -----------------------------------------------------------------
 -- Notification System (GÓC TRÊN BÊN PHẢI)
 -----------------------------------------------------------------
@@ -499,8 +498,7 @@ staminaBtn.MouseButton1Click:Connect(function()
 			while infStaminaEnabled do
 				task.wait(0.1)
 				
-				character:SetAttribute("MaxStamina", math.huge)
-				StaminaModule.Stamina = math.huge
+                character:SetAttribute("MaxStamina", math.huge)
 				
 			end
 		end)
