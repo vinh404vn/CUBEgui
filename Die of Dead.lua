@@ -1,9 +1,8 @@
 --[[
-	CUBE_DoD - indev 0.4+ (vinh404)
-	- Version tăng thủ công: thay BASE_VERSION khi update
-	- Bắt đầu: 0.4 → 0.5 → 0.6...
-	- Notification: góc trên bên phải
-	- GUI: CUBE_DoD
+	updatelog
+    -remake the inf stamina
+    -nothing
+    version: indevHOTFIX 0.61
 --]]
 
 local Players      = game:GetService("Players")
@@ -21,8 +20,8 @@ if old then old:Destroy() end
 -- VERSION: TĂNG THỦ CÔNG KHI UPDATE GITHUB
 -----------------------------------------------------------------
 local BASE_VERSION = 0.6   -- Thay đổi khi update
-local HOTFIX = false
-local HOTFIX_VERSION = 0.00
+local HOTFIX = true
+local HOTFIX_VERSION = 0.01
 -----------------------------------------------------------------
 -- Notification System (GÓC TRÊN BÊN PHẢI)
 -----------------------------------------------------------------
@@ -467,7 +466,7 @@ local staminaLabel = Instance.new("TextLabel")
 staminaLabel.Size = UDim2.new(0.65,0,0,30)
 staminaLabel.Position = UDim2.new(0,10,0,60)
 staminaLabel.BackgroundTransparency = 1
-staminaLabel.Text = "Inf MaxStamina"
+staminaLabel.Text = "Inf Stamina"
 staminaLabel.TextColor3 = Color3.fromRGB(200,255,200)
 staminaLabel.Font = Enum.Font.SourceSansBold
 staminaLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -491,31 +490,26 @@ staminaBtn.MouseButton1Click:Connect(function()
 		staminaBtn.Text = "ON"
 		staminaBtn.TextColor3 = Color3.fromRGB(0,255,0)
 		staminaBtn.BackgroundColor3 = Color3.fromRGB(0,50,0)
-		showNotification("Inf MaxStamina: ON", Color3.fromRGB(100,255,100))
+		showNotification("Inf Stamina: ON", Color3.fromRGB(100,255,100))
 		
 		spawn(function()
 			while infStaminaEnabled do
 				task.wait(0.1)
 				
-				pcall(function()
-					local character = Player.Character
-					if character then
-						local attributes = character:FindFirstChild("Attributes")
-						if attributes then
-							local maxStamina = attributes:FindFirstChild("MaxStamina")
-							if maxStamina and maxStamina:IsA("NumberValue") then
-								maxStamina.Value = 1e+99
-							end
-						end
-					end
-				end)
+				task.spawn(function()
+                  while true do
+                    task.wait(0.01)
+                    if not staminaM then return end
+                    staminaM.Stamina=staminaM.MaxStamina
+                  end
+               end)
 			end
 		end)
 	else
 		staminaBtn.Text = "OFF"
 		staminaBtn.TextColor3 = Color3.new(1,0,0)
 		staminaBtn.BackgroundColor3 = Color3.fromRGB(50,0,0)
-		showNotification("Inf MaxStamina: OFF")
+		showNotification("Inf Stamina: OFF")
 	end
 end)
 
