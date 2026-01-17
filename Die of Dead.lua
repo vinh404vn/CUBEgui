@@ -10,7 +10,9 @@ local Replicated   = game:GetService("ReplicatedStorage")
 local Events       = Replicated:WaitForChild("Events")
 local TweenService = game:GetService("TweenService")
 local Player       = Players.LocalPlayer
+local character    = Player.Character
 local PlayerGui    = Player:WaitForChild("PlayerGui")
+local StaminaModule = Module:RequestModule(LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MainGui"):WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("Movement"))
 
 -- XÓA GUI CŨ
 local old = PlayerGui:FindFirstChild("CUBE_DoD")
@@ -21,7 +23,7 @@ if old then old:Destroy() end
 -----------------------------------------------------------------
 local BASE_VERSION = 0.6   -- Thay đổi khi update
 local HOTFIX = true
-local HOTFIX_VERSION = 0.01
+local HOTFIX_VERSION = 0.02
 -----------------------------------------------------------------
 -- Notification System (GÓC TRÊN BÊN PHẢI)
 -----------------------------------------------------------------
@@ -496,13 +498,9 @@ staminaBtn.MouseButton1Click:Connect(function()
 			while infStaminaEnabled do
 				task.wait(0.1)
 				
-				task.spawn(function()
-                  while true do
-                    task.wait(0.01)
-                    if not staminaM then return end
-                    staminaM.Stamina=staminaM.MaxStamina
-                  end
-               end)
+				character:SetAttribute("MaxStamina", math.huge)
+				StaminaModule.Stamina = math.huge
+				
 			end
 		end)
 	else
