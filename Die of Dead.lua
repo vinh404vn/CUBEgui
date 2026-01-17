@@ -1,8 +1,8 @@
 --[[
 	updatelog
-    -remake the inf stamina
-    -nothing
-    version: indevHOTFIX 0.61
+    -forgot to change this
+    -fix the Inf Stamina
+    version: indevHOTFIX 0.63
 --]]
 
 local Players      = game:GetService("Players")
@@ -23,7 +23,8 @@ if old then old:Destroy() end
 -----------------------------------------------------------------
 local BASE_VERSION = 0.6   -- Thay đổi khi update
 local HOTFIX = true
-local HOTFIX_VERSION = 0.02
+local HOTFIX_VERSION = 0.03
+local jokeText = "i don't think you gonna read this"
 -----------------------------------------------------------------
 -- Notification System (GÓC TRÊN BÊN PHẢI)
 -----------------------------------------------------------------
@@ -463,7 +464,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Inf MaxStamina Toggle
+-- Inf Stamina Toggle
 local staminaLabel = Instance.new("TextLabel")
 staminaLabel.Size = UDim2.new(0.65,0,0,30)
 staminaLabel.Position = UDim2.new(0,10,0,60)
@@ -550,9 +551,9 @@ version.Size = UDim2.new(0,250,0,20)
 version.Position = UDim2.new(0,5,1,-22)
 version.BackgroundTransparency = 1
 if HOTFIX then
-    version.Text = "CUBE_DoD - indevHOTFIX " .. string.format("%.2f", BASE_VERSION + HOTFIX_VERSION)
+    version.Text = "CUBE_DoD - indevHOTFIX " .. string.format("%.2f", BASE_VERSION + HOTFIX_VERSION) .. jokeText
 else
-    version.Text = "CUBE_DoD - indev " .. string.format("%.1f", BASE_VERSION)
+    version.Text = "CUBE_DoD - indev " .. string.format("%.1f", BASE_VERSION) .. jokeText
 end
 version.Font = Enum.Font.SourceSans
 version.TextSize = 14
