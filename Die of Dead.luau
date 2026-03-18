@@ -1,5 +1,6 @@
 --[[
 	updatelog
+	-bruh the file extention
     -delete the module
     -fix the Inf Stamina
     version: indevHOTFIX 0.67
